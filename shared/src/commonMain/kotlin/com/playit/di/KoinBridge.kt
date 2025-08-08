@@ -3,7 +3,7 @@ package com.playit.di
 import org.koin.core.context.startKoin
 
 class KoinBridge {
-    fun initKoin() {
+    fun doInitKoin() {
         startKoin {
             modules(sharedModules())
         }

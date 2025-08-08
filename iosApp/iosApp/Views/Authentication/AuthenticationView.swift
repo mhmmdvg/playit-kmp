@@ -6,8 +6,37 @@
 //
 
 import SwiftUI
+import Shared
 
 struct AuthenticationView: View {
+    
+    @StateObject private var authViewModel: AuthenticationViewModel
+    @State private var showingAlert = false
+    
+    let onAuthenticationSuccess: () -> Void
+    
+    init(authRepository: AuthenticationRepository, onAuthenticationSuccess: @escaping () -> Void) {
+        self._authViewModel = StateObject(wrappedValue: AuthenticationViewModel(authenticationRepository: authRepository))
+        self.onAuthenticationSuccess = onAuthenticationSuccess
+    }
+    
+    private func signInWithSpotify() {
+        authViewModel.signIn()
+    }
+    
+    private func setupAuthCompletion() {
+        authViewModel.completion = { [weak authViewModel] success in
+            DispatchQueue.main.async {
+                if success {
+                    onAuthenticationSuccess()
+                } else if authViewModel?.errorMessage == nil {
+                    authViewModel?.errorMessage = "Authentication failed"
+                }
+            }
+            
+        }
+    }
+    
     var body: some View {
         VStack(spacing: 24) {
             // Header Section
@@ -31,13 +60,19 @@ struct AuthenticationView: View {
             
             // Button Section
             Button(action: {
-                print("Spotify login tapped")
+                signInWithSpotify()
             }) {
                 HStack(spacing: 12) {
-                    Image(systemName: "music.note")
-                        .font(.title2)
+                    if authViewModel.isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(0.8)
+                    } else {
+                        Image(systemName: "music.note")
+                            .font(.title2)
+                    }
                     
-                    Text("Continue with Spotify")
+                    Text(authViewModel.isLoading ? "Signing in..." : "Continue with Spotify")
                         .fontWeight(.semibold)
                         .font(.body)
                 }
@@ -62,15 +97,37 @@ struct AuthenticationView: View {
         .padding(.vertical, 48)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))
+        .onAppear {
+            setupAuthCompletion()
+        }
+        .alert("Authentication Error", isPresented: $showingAlert) {
+            Button("OK", role: .cancel) {
+                authViewModel.errorMessage = nil
+            }
+        } message: {
+            Text(authViewModel.errorMessage ?? "An unknown error occurred")
+        }
+        .onChange(of: authViewModel.errorMessage) { errorMessage in
+            showingAlert = errorMessage != nil
+        }
     }
 }
 
-struct AuthenticationView_Previews: PreviewProvider {
-    static var previews: some View {
-        AuthenticationView()
-            .preferredColorScheme(.light)
-        
-        AuthenticationView()
-            .preferredColorScheme(.dark)
-    }
-}
+//struct AuthenticationView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        // Mock dependencies for preview
+//        let mockTokenManager = TokenManager()
+//        let mockHttpClient = .shared.httpClient // You'll need to implement this
+//        let mockAuthRepository = AuthenticationRepository(tokenManager: mockTokenManager, httpClient: mockHttpClient)
+//        
+//        AuthenticationView(authRepository: mockAuthRepository) {
+//            print("Authentication successful!")
+//        }
+//        .preferredColorScheme(.light)
+//        
+//        AuthenticationView(authRepository: mockAuthRepository) {
+//            print("Authentication successful!")
+//        }
+//        .preferredColorScheme(.dark)
+//    }
+//}

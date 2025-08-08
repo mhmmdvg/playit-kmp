@@ -2,32 +2,27 @@ import SwiftUI
 import Shared
 
 struct ContentView: View {
-    @State private var showContent = false
+    @Environment(\.authRepository) private var authRepository
+    @State private var isAuthenticated = false
+    
+    private func checkAuthenticationStatus() {
+        isAuthenticated = authRepository.isUserLoggedIn()
+    }
+    
     var body: some View {
-        VStack {
-            Button("Click me!") {
-                withAnimation {
-                    showContent = !showContent
+        Group {
+            if isAuthenticated {
+                HomeView()
+            } else {
+                AuthenticationView(authRepository: authRepository) {
+                    isAuthenticated = true
                 }
-            }
-
-            if showContent {
-                VStack(spacing: 16) {
-                    Image(systemName: "swift")
-                        .font(.system(size: 200))
-                        .foregroundColor(.accentColor)
-                    Text("SwiftUI: \(Greeting().greet())")
-                }
-                .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .padding()
+        .onAppear {
+            checkAuthenticationStatus()
+        }
     }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
+    
+    
 }

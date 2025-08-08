@@ -5,6 +5,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.ResponseException
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerTokens
+import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
@@ -31,12 +34,29 @@ actual fun provideHttpClient(tokenManager: TokenManager): HttpClient {
             level = LogLevel.ALL
         }
 
+        install(Auth) {
+            bearer {
+                loadTokens {
+                    val token = tokenManager.getToken()
+                    token?.let {
+                        BearerTokens(accessToken = it, refreshToken = null)
+                    }
+                }
+
+                refreshTokens {
+                    val token = tokenManager.getToken()
+
+                    token?.let {
+                        BearerTokens(accessToken = it, refreshToken = null)
+                    }
+                }
+            }
+        }
+
+
         defaultRequest {
             url("https://api.spotify.com/v1")
             header(HttpHeaders.ContentType, ContentType.Application.Json)
-            tokenManager.getToken()?.let {
-                header(HttpHeaders.Authorization, "Bearer $it")
-            }
         }
 
         HttpResponseValidator {
