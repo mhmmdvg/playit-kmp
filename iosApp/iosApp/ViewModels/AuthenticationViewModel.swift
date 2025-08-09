@@ -60,7 +60,14 @@ class AuthenticationViewModel: NSObject, ObservableObject, ASWebAuthenticationPr
             
             let authSession = ASWebAuthenticationSession(url: authUrl, callbackURLScheme: "playit") { url, error in
                 if let error = error {
-                    completion(.failure(error))
+                    
+                    if let authError = error as? ASWebAuthenticationSessionError,
+                       authError.code == .canceledLogin {
+                        self.isLoading = false
+                        return
+                    } else {
+                        completion(.failure(error))
+                    }
                 } else if let url = url,
                           let code = URLComponents(string: url.absoluteString)?.queryItems?.first(where: { $0.name == "code" })?.value {
                               completion(.success(code))
@@ -80,6 +87,7 @@ class AuthenticationViewModel: NSObject, ObservableObject, ASWebAuthenticationPr
                      self.authenticationRepository.exchangeCodeForToken(
                          code: code,
                          completion: { result in
+                             
                              DispatchQueue.main.async {
                                  if result is ResourceSuccess {
                                      completion(.success(true))
@@ -116,6 +124,10 @@ class AuthenticationViewModel: NSObject, ObservableObject, ASWebAuthenticationPr
     
     func signOut() {
         authenticationRepository.logout()
+    }
+    
+    func getToken() {
+        authenticationRepository.getAccessToken()
     }
 
 }

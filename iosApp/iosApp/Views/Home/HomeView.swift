@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct HomeView: View {
-    @Environment(\.authRepository) private var authRepository
+    @EnvironmentObject private var authStateManager: AuthenticationStateManager
+
     
     var body: some View {
            NavigationView {
@@ -17,9 +18,29 @@ struct HomeView: View {
                        .font(.title)
                        .padding()
                    
+                   VStack {
+                       Text("Debug Info:")
+                           .font(.headline)
+                       
+                       Text("Logged in: \(authStateManager.isAuthenticated ? "Yes" : "No")")
+                       
+                       if let token = authStateManager.getAccessToken() {
+                           Text("Token: \(token.prefix(20))...")
+                               .font(.caption)
+                               .foregroundColor(.green)
+                       } else {
+                           Text("Token: Not found")
+                               .font(.caption)
+                               .foregroundColor(.red)
+                       }
+                   }
+                   .padding()
+                   .background(Color.gray.opacity(0.1))
+                   .cornerRadius(8)
+                   
                     Button("Sign Out") {
-                        authRepository.logout()
-                        // You might want to notify ContentView to update isAuthenticated
+                        authStateManager.logout()
+                        
                     }
                     .padding()
                     .background(Color.red)

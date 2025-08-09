@@ -107,9 +107,9 @@ struct AuthenticationView: View {
         } message: {
             Text(authViewModel.errorMessage ?? "An unknown error occurred")
         }
-        .onChange(of: authViewModel.errorMessage) { errorMessage in
+        .onChange(of: authViewModel.errorMessage, { _, errorMessage in
             showingAlert = errorMessage != nil
-        }
+        })
     }
 }
 

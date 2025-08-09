@@ -2,25 +2,21 @@ import SwiftUI
 import Shared
 
 struct ContentView: View {
+    @EnvironmentObject private var authStateManager: AuthenticationStateManager
     @Environment(\.authRepository) private var authRepository
-    @State private var isAuthenticated = false
-    
-    private func checkAuthenticationStatus() {
-        isAuthenticated = authRepository.isUserLoggedIn()
-    }
     
     var body: some View {
         Group {
-            if isAuthenticated {
+            if authStateManager.isAuthenticated {
                 HomeView()
             } else {
                 AuthenticationView(authRepository: authRepository) {
-                    isAuthenticated = true
+                    authStateManager.login()
                 }
             }
         }
         .onAppear {
-            checkAuthenticationStatus()
+            authStateManager.checkAuthenticationStatus()
         }
     }
     

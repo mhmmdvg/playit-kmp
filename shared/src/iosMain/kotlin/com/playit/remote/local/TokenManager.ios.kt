@@ -1,23 +1,14 @@
 package com.playit.remote.local
 
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.longOrNull
-import platform.Foundation.NSData
-import platform.Foundation.NSDataBase64DecodingIgnoreUnknownCharacters
 import platform.Foundation.NSDate
-import platform.Foundation.NSString
-import platform.Foundation.NSUTF8StringEncoding
 import platform.Foundation.NSUserDefaults
-import platform.Foundation.create
 import platform.Foundation.timeIntervalSince1970
 
-@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual class TokenManager {
 
     companion object {
         private const val TOKEN_KEY = "access_token"
+        private const val TOKEN_EXPIRES_KEY = "token_expires_at"
     }
 
     actual fun saveToken(token: String) {
@@ -40,34 +31,25 @@ actual class TokenManager {
 
     actual fun isTokenExpired(token: String): Boolean {
         return try {
-            val parts = token.split(".")
+            val expirationTime = NSUserDefaults.standardUserDefaults.doubleForKey(TOKEN_EXPIRES_KEY)
 
-            if (parts.size != 3) return true
+            if (expirationTime == 0.0) {
+                return false
+            }
 
-            val payload = parts[1]
+            val currentTime = NSDate().timeIntervalSince1970
+            val isExpired = currentTime >= expirationTime
 
-            // Base64 decoding for iOS
-            val data = NSData.create(
-                base64EncodedString = payload.replace('-', '+').replace('_', '/'),
-                options = NSDataBase64DecodingIgnoreUnknownCharacters
-            ) ?: return true
-
-            val decodedString = NSString.create(data = data, encoding = NSUTF8StringEncoding)?.toString()
-                ?: return true
-
-            val json = Json.parseToJsonElement(decodedString).jsonObject
-            val expirationTime = json["exp"]?.jsonPrimitive?.longOrNull ?: return true
-
-            val currentTime = NSDate().timeIntervalSince1970.toLong()
-            expirationTime < currentTime
-        } catch (e: Exception) {
-            println("Token validation error: ${e.message}")
-            true
+            isExpired
+        } catch (error: Exception) {
+            error.printStackTrace()
+            false
         }
     }
 
     actual fun clearToken() {
         NSUserDefaults.standardUserDefaults.removeObjectForKey(TOKEN_KEY)
+        NSUserDefaults.standardUserDefaults.removeObjectForKey(TOKEN_EXPIRES_KEY)
         NSUserDefaults.standardUserDefaults.synchronize()
     }
 }
