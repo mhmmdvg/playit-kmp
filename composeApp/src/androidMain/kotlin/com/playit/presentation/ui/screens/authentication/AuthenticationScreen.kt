@@ -15,10 +15,10 @@ import org.koin.androidx.compose.koinViewModel
 @Preview
 fun AuthenticationScreen(
     onAuthenticationSuccess: () -> Unit,
+    onLaunchOAuth: (String) -> Unit,
     viewModel: AuthenticaitonViewModel = koinViewModel()
 ) {
     val authUiState by viewModel.authUiState.collectAsState()
-    val showWebView by viewModel.showWebView.collectAsState()
 
     LaunchedEffect(authUiState.isAuthenticated) {
         if (authUiState.isAuthenticated) {
@@ -32,26 +32,13 @@ fun AuthenticationScreen(
         }
     }
 
-    if (showWebView) {
-        SpotifyWebView(
-            onCodeReceived = { code ->
-                viewModel.onAuthorizationCodeReceived(code)
-            },
-            onError = { errorMessage ->
-                viewModel.onWebViewError(errorMessage)
-            },
-            onCancelled = {
-                viewModel.onWebViewCancelled()
-            }
-        )
-    } else {
-        AuthenticationContent(
-            isLoading = authUiState.isLoading,
-            errorMessage = authUiState.errorMessage,
-        ) {
-            viewModel.signIn()
+    AuthenticationContent(
+        isLoading = authUiState.isLoading,
+        errorMessage = authUiState.errorMessage,
+        onSignIn = {
+            viewModel.signIn(onLaunchOAuth)
         }
-    }
+    )
 
 
 }

@@ -13,37 +13,62 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.playit.presentation.ui.screens.authentication.AuthenticationScreen
+import com.playit.presentation.ui.screens.home.HomeScreen
+import com.playit.remote.repository.AuthenticationRepository
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.koinInject
 
 import playit.composeapp.generated.resources.Res
 import playit.composeapp.generated.resources.compose_multiplatform
 
 @Composable
 @Preview
-fun App() {
+fun App(
+    onLaunchOAuth: (String) -> Unit
+) {
+
+    val navController = rememberNavController()
+    val authenticationRepository: AuthenticationRepository = koinInject()
+
+    val startDestination = if (authenticationRepository.isUserLoggedIn()) {
+        "home"
+    } else {
+        "authentication"
+    }
+
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .safeContentPadding()
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+
+        NavHost(
+            navController = navController,
+            startDestination = startDestination,
+            modifier = Modifier.fillMaxSize()
         ) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
+            composable("authentication") {
+                AuthenticationScreen(
+                    onAuthenticationSuccess = {
+                        navController.navigate("home") {
+                            popUpTo("authentication") { inclusive = true }
+                        }
+                    },
+                    onLaunchOAuth = onLaunchOAuth
+                )
             }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
-                }
+
+            composable("home") {
+                HomeScreen(
+                    onSignOut = {
+                        navController.navigate("authentication") {
+                            popUpTo("home") { inclusive = true }
+                        }
+                    }
+                )
             }
         }
+
     }
 }
