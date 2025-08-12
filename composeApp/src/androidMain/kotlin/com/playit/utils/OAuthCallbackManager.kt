@@ -1,11 +1,12 @@
 package com.playit.utils
 
+import android.util.Log
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
 object OAuthCallbackManager {
-    private val _authorizationCode = MutableSharedFlow<String>(replay = 0)
+    private val _authorizationCode = MutableSharedFlow<String>(replay = 0, extraBufferCapacity = 1)
     val authorizationCode: SharedFlow<String> = _authorizationCode.asSharedFlow()
 
     private val _authorizationError = MutableSharedFlow<String>(replay = 0)

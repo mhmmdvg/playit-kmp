@@ -1,32 +1,42 @@
 package com.playit.presentation.ui.screens.home
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.playit.remote.repository.AuthenticationRepository
-import org.koin.compose.koinInject
+import com.playit.presentation.viewmodel.AuthenticationViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onSignOut: () -> Unit,
-    authenticationRepository: AuthenticationRepository = koinInject()
+    authenticationViewModel: AuthenticationViewModel = koinViewModel(),
 ) {
-    val isAuthenticated by remember {
-        derivedStateOf { authenticationRepository.isUserLoggedIn() }
-    }
+    val authState by authenticationViewModel.authUiState.collectAsState()
 
-    val accessToken by remember {
-        derivedStateOf { authenticationRepository.getAccessToken() }
-    }
 
     Scaffold(
         topBar = {
@@ -79,15 +89,15 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Logged in: ${if (isAuthenticated) "Yes" else "No"}",
+                        text = "Logged in: ${if (authState.isAuthenticated) "Yes" else "No"}",
                         style = MaterialTheme.typography.bodyMedium
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    if (!accessToken.isNullOrEmpty()) {
+                    if (!authenticationViewModel.getToken().isNullOrEmpty()) {
                         Text(
-                            text = "Token: ${accessToken?.take(20)}...",
+                            text = "Token: ${authenticationViewModel.getToken()?.take(20)}...",
                             style = MaterialTheme.typography.bodySmall,
                             color = Color(0xFF4CAF50) // Green color
                         )
@@ -106,7 +116,7 @@ fun HomeScreen(
             // Sign out button
             Button(
                 onClick = {
-                    authenticationRepository.logout()
+                    authenticationViewModel.signOut()
                     onSignOut()
                 },
                 modifier = Modifier.padding(16.dp),

@@ -1,17 +1,8 @@
 package com.playit
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,17 +10,15 @@ import androidx.navigation.compose.rememberNavController
 import com.playit.presentation.ui.screens.authentication.AuthenticationScreen
 import com.playit.presentation.ui.screens.home.HomeScreen
 import com.playit.remote.repository.AuthenticationRepository
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
-
-import playit.composeapp.generated.resources.Res
-import playit.composeapp.generated.resources.compose_multiplatform
 
 @Composable
 @Preview
 fun App(
-    onLaunchOAuth: (String) -> Unit
+    onLaunchOAuth: (String) -> Unit,
+//    onAuthenticationComplete: () -> Unit,
+    onSetTabCloseListener: (() -> Unit) -> Unit
 ) {
 
     val navController = rememberNavController()
@@ -55,6 +44,7 @@ fun App(
                             popUpTo("authentication") { inclusive = true }
                         }
                     },
+                    onSetTabCloseListener = onSetTabCloseListener,
                     onLaunchOAuth = onLaunchOAuth
                 )
             }
@@ -65,7 +55,8 @@ fun App(
                         navController.navigate("authentication") {
                             popUpTo("home") { inclusive = true }
                         }
-                    }
+                    },
+//                    onAuthenticationComplete = onAuthenticationComplete
                 )
             }
         }

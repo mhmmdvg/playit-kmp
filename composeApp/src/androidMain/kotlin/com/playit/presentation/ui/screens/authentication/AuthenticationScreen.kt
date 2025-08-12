@@ -6,7 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.playit.presentation.ui.components.SpotifyWebView
 import com.playit.presentation.ui.screens.authentication.components.AuthenticationContent
-import com.playit.presentation.viewmodel.AuthenticaitonViewModel
+import com.playit.presentation.viewmodel.AuthenticationViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.androidx.compose.koinViewModel
 
@@ -15,8 +15,9 @@ import org.koin.androidx.compose.koinViewModel
 @Preview
 fun AuthenticationScreen(
     onAuthenticationSuccess: () -> Unit,
+    onSetTabCloseListener: (() -> Unit) -> Unit,
     onLaunchOAuth: (String) -> Unit,
-    viewModel: AuthenticaitonViewModel = koinViewModel()
+    viewModel: AuthenticationViewModel = koinViewModel()
 ) {
     val authUiState by viewModel.authUiState.collectAsState()
 
@@ -36,7 +37,7 @@ fun AuthenticationScreen(
         isLoading = authUiState.isLoading,
         errorMessage = authUiState.errorMessage,
         onSignIn = {
-            viewModel.signIn(onLaunchOAuth)
+            viewModel.signIn(onLaunchOAuth, onSetTabCloseListener)
         }
     )
 

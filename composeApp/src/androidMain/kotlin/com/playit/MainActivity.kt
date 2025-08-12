@@ -1,13 +1,10 @@
 package com.playit
 
-import android.app.ComponentCaller
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.playit.constants.SpotifyConfig
 import com.playit.utils.ChromeCustomTabsManager
 import com.playit.utils.OAuthCallbackManager
@@ -20,7 +17,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        chromeCustomTabsManager = ChromeCustomTabsManager(this)
+        chromeCustomTabsManager = ChromeCustomTabsManager(this, this)
         chromeCustomTabsManager.bindCustomTabsService()
 
         handleOAuthRedirect(intent)
@@ -29,6 +26,12 @@ class MainActivity : ComponentActivity() {
             App(
                 onLaunchOAuth = { url ->
                     chromeCustomTabsManager.openCustomTab(url)
+                },
+//                onAuthenticationComplete = {
+//                    chromeCustomTabsManager.onAuthenticationComplete()
+//                },
+                onSetTabCloseListener = { callback ->
+                    chromeCustomTabsManager.setOnTabClosedListener(callback)
                 }
             )
         }
@@ -36,6 +39,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+
         setIntent(intent) // Important: update the activity's intent
         handleOAuthRedirect(intent)
     }
@@ -56,7 +60,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleOAuthRedirect(intent: Intent?) {
+
         intent?.data?.let { uri ->
+
             if (uri.toString().startsWith(SpotifyConfig.REDIRECT_URI)) {
                 val code = uri.getQueryParameter("code")
                 val error = uri.getQueryParameter("error")
@@ -65,10 +71,13 @@ class MainActivity : ComponentActivity() {
                     code != null -> {
                         OAuthCallbackManager.handleAuthorizationCode(code)
                     }
+
                     error != null -> {
-                        val errorDescription = uri.getQueryParameter("error_description") ?: "Authorization failed"
+                        val errorDescription =
+                            uri.getQueryParameter("error_description") ?: "Authorization failed"
                         OAuthCallbackManager.handleError(errorDescription)
                     }
+
                     else -> {
                         OAuthCallbackManager.handleError("Invalid authorization response")
                     }
@@ -77,9 +86,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-//@Preview
-//@Composable
-//fun AppAndroidPreview() {
-//    App()
-//}

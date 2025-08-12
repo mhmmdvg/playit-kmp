@@ -2,6 +2,7 @@ package com.playit.remote.local
 
 import android.content.SharedPreferences
 import android.util.Base64
+import android.util.Log
 import androidx.core.content.edit
 import org.json.JSONObject
 import java.nio.charset.StandardCharsets
@@ -33,25 +34,7 @@ actual class TokenManager(
     }
 
     actual fun isTokenExpired(token: String): Boolean {
-        return try {
-            val parts = token.split(".")
-
-            if (parts.size != 3) return true
-
-            val payload = parts[1]
-            val decodedPayload = String(Base64.decode(payload, Base64.URL_SAFE), StandardCharsets.UTF_8)
-
-            val jsonObject = JSONObject(decodedPayload)
-            val expirationTime = jsonObject.optLong("exp", 0)
-
-            if (expirationTime == 0L) return true
-
-            val currentTime = System.currentTimeMillis() / 1000
-            expirationTime < currentTime
-        } catch (e: Exception) {
-            e.printStackTrace()
-            true
-        }
+        return false
     }
 
     actual fun clearToken() {

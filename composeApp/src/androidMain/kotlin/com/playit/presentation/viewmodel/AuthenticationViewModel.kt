@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class AuthenticaitonViewModel(
+class AuthenticationViewModel(
     private val authenticationRepository: AuthenticationRepository
 ) : ViewModel() {
 
@@ -30,7 +30,7 @@ class AuthenticaitonViewModel(
         observeAppLifecycle()
     }
 
-    fun signIn(onLaunchOAuth: (String) -> Unit) {
+    fun signIn(onLaunchOAuth: (String) -> Unit, onSetTabCloseListener: (() -> Unit) -> Unit) {
         _authUiState.value = _authUiState.value.copy(isLoading = true, errorMessage = null)
         oauthInProgress = true
 
@@ -38,16 +38,27 @@ class AuthenticaitonViewModel(
 
         // Set custom tab launched flag BEFORE launching
         OAuthCallbackManager.setCustomTabLaunched()
+
+        onSetTabCloseListener {
+            if (oauthInProgress) {
+                onOAuthCancelled()
+            }
+        }
+
         onLaunchOAuth(oauthUrl)
 
         // Start timeout to handle cancellation
         startOAuthTimeout()
     }
 
+    fun getToken(): String? {
+        return authenticationRepository.getAccessToken()
+    }
+
     private fun startOAuthTimeout() {
         oauthTimeoutJob?.cancel()
         oauthTimeoutJob = viewModelScope.launch {
-            delay(3000)
+            delay(30000)
             if (oauthInProgress) {
                 onOAuthCancelled()
             }
@@ -55,6 +66,7 @@ class AuthenticaitonViewModel(
     }
 
     private fun observeOAuthCallbacks() {
+
         viewModelScope.launch {
             OAuthCallbackManager.authorizationCode.collect { code ->
                 onAuthorizationCodeReceived(code)
@@ -71,14 +83,12 @@ class AuthenticaitonViewModel(
     private fun observeAppLifecycle() {
         viewModelScope.launch {
             OAuthCallbackManager.appResumed.collect {
+
                 // If app is resumed and OAuth was in progress and a custom tab was launched,
                 // wait a bit to see if we get a callback
                 if (oauthInProgress && OAuthCallbackManager.isCustomTabLaunched()) {
-                    delay(1000) // Wait 1 second after resume to ensure no redirect is coming
+                    delay(500) // Wait 1 second after resume to ensure no redirect is coming
                     // If still no callback after delay, consider it cancelled
-                    if (oauthInProgress && OAuthCallbackManager.isCustomTabLaunched()) {
-                        onOAuthCancelled()
-                    }
                 }
             }
         }
@@ -112,6 +122,7 @@ class AuthenticaitonViewModel(
                     is Resource.Loading -> {
                         _authUiState.value = _authUiState.value.copy(isLoading = true)
                     }
+
                 }
             }
         }
@@ -150,6 +161,7 @@ class AuthenticaitonViewModel(
     fun signOut() {
         authenticationRepository.logout()
         _authUiState.value = _authUiState.value.copy(isAuthenticated = false)
+        onOAuthCancelled()
     }
 
     fun clearErrorMessage() {
