@@ -12,13 +12,17 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.parameters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class AuthenticationRepository(
     private val tokenManager: TokenManager,
     private val httpClient: HttpClient
 ) {
-
+    private val _authStateFlow = MutableStateFlow(isUserLoggedIn())
+    val authStateFlow: StateFlow<Boolean> = _authStateFlow.asStateFlow()
     fun isUserLoggedIn(): Boolean {
         return tokenManager.getToken() != null
     }
@@ -44,6 +48,7 @@ class AuthenticationRepository(
                     HttpStatusCode.OK -> {
                         val tokenResponse = response.body<AuthenticationResponse>()
                         tokenManager.saveToken(tokenResponse.accessToken)
+                        _authStateFlow.value = true
                         completion(Resource.Success(true))
                     }
                     else -> {
@@ -59,10 +64,14 @@ class AuthenticationRepository(
 
     fun logout() {
         tokenManager.clearToken()
+        _authStateFlow.value = false
     }
 
     fun getAccessToken(): String? {
         return tokenManager.getToken()
     }
 
+    fun refreshAuthState() {
+        _authStateFlow.value = isUserLoggedIn()
+    }
 }

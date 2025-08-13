@@ -14,18 +14,17 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 @Preview
 fun AuthenticationScreen(
-    onAuthenticationSuccess: () -> Unit,
     onSetTabCloseListener: (() -> Unit) -> Unit,
     onLaunchOAuth: (String) -> Unit,
     viewModel: AuthenticationViewModel = koinViewModel()
 ) {
     val authUiState by viewModel.authUiState.collectAsState()
 
-    LaunchedEffect(authUiState.isAuthenticated) {
-        if (authUiState.isAuthenticated) {
-            onAuthenticationSuccess()
-        }
-    }
+//    LaunchedEffect(authUiState.isAuthenticated) {
+//        if (authUiState.isAuthenticated) {
+//            onAuthenticationSuccess()
+//        }
+//    }
 
     authUiState.errorMessage?.let { errorMessage ->
         LaunchedEffect(errorMessage) {

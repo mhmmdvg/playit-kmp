@@ -32,7 +32,6 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onSignOut: () -> Unit,
     authenticationViewModel: AuthenticationViewModel = koinViewModel(),
 ) {
     val authState by authenticationViewModel.authUiState.collectAsState()
@@ -117,7 +116,6 @@ fun HomeScreen(
             Button(
                 onClick = {
                     authenticationViewModel.signOut()
-                    onSignOut()
                 },
                 modifier = Modifier.padding(16.dp),
                 colors = ButtonDefaults.buttonColors(

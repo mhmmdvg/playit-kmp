@@ -1,4 +1,4 @@
-package com.playit
+package com.playit.presentation
 
 import android.content.Intent
 import android.os.Bundle
@@ -27,9 +27,6 @@ class MainActivity : ComponentActivity() {
                 onLaunchOAuth = { url ->
                     chromeCustomTabsManager.openCustomTab(url)
                 },
-//                onAuthenticationComplete = {
-//                    chromeCustomTabsManager.onAuthenticationComplete()
-//                },
                 onSetTabCloseListener = { callback ->
                     chromeCustomTabsManager.setOnTabClosedListener(callback)
                 }
