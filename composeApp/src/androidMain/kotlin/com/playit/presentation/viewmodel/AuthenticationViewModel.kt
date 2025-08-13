@@ -105,7 +105,7 @@ class AuthenticationViewModel(
                 when (result) {
                     is Resource.Success -> {
                         _authUiState.value = _authUiState.value.copy(
-                            isLoading = false,
+                            isLoading = true,
                             isAuthenticated = true,
                             errorMessage = null
                         )
