@@ -43,19 +43,15 @@ actual fun provideHttpClient(tokenManager: TokenManager): HttpClient {
                     }
                 }
 
-                refreshTokens {
-                    val token = tokenManager.getToken()
-
-                    token?.let {
-                        BearerTokens(accessToken = it, refreshToken = null)
-                    }
+                sendWithoutRequest { req ->
+                    req.url.host == "api.spotify.com"
                 }
             }
         }
 
 
         defaultRequest {
-            url("https://api.spotify.com/v1")
+            url("https://api.spotify.com/v1/")
             header(HttpHeaders.ContentType, ContentType.Application.Json)
         }
 

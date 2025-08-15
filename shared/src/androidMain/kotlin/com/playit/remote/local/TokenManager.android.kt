@@ -14,6 +14,7 @@ actual class TokenManager(
 
     companion object {
         private const val TOKEN_KEY = "access_token"
+        private const val TOKEN_EXPIRES_KEY = "expires_in"
     }
 
     actual fun saveToken(token: String) {
@@ -34,7 +35,20 @@ actual class TokenManager(
     }
 
     actual fun isTokenExpired(token: String): Boolean {
-        return false
+        return try {
+            val expirationTime = sharedPreferences.getFloat(TOKEN_EXPIRES_KEY, 0.0f).toDouble()
+
+            if (expirationTime == 0.0) {
+                return false
+            }
+
+            val currentTime = System.currentTimeMillis() / 1000.0
+            val isExpired = currentTime >= expirationTime
+
+            isExpired
+        } catch (e: Exception) {
+            false
+        }
     }
 
     actual fun clearToken() {

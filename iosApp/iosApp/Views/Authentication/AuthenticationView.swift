@@ -9,33 +9,9 @@ import SwiftUI
 import Shared
 
 struct AuthenticationView: View {
-    
-    @StateObject private var authViewModel: AuthenticationViewModel
+    @EnvironmentObject private var authViewModel: AuthenticationViewModel
     @State private var showingAlert = false
     
-    let onAuthenticationSuccess: () -> Void
-    
-    init(authRepository: AuthenticationRepository, onAuthenticationSuccess: @escaping () -> Void) {
-        self._authViewModel = StateObject(wrappedValue: AuthenticationViewModel(authenticationRepository: authRepository))
-        self.onAuthenticationSuccess = onAuthenticationSuccess
-    }
-    
-    private func signInWithSpotify() {
-        authViewModel.signIn()
-    }
-    
-    private func setupAuthCompletion() {
-        authViewModel.completion = { [weak authViewModel] success in
-            DispatchQueue.main.async {
-                if success {
-                    onAuthenticationSuccess()
-                } else if authViewModel?.errorMessage == nil {
-                    authViewModel?.errorMessage = "Authentication failed"
-                }
-            }
-            
-        }
-    }
     
     var body: some View {
         VStack(spacing: 24) {
@@ -60,7 +36,7 @@ struct AuthenticationView: View {
             
             // Button Section
             Button(action: {
-                signInWithSpotify()
+                authViewModel.signIn()
             }) {
                 HStack(spacing: 12) {
                     if authViewModel.isLoading {
@@ -91,14 +67,14 @@ struct AuthenticationView: View {
             }
             .buttonStyle(PlainButtonStyle())
             .scaleEffect(1.0)
-            .animation(.easeInOut(duration: 0.1), value: false)
+            .animation(.easeInOut(duration: 0.1), value: authViewModel.isLoading)
         }
         .padding(.horizontal, 32)
         .padding(.vertical, 48)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))
         .onAppear {
-            setupAuthCompletion()
+            authViewModel.checkAuthenticationStatus()
         }
         .alert("Authentication Error", isPresented: $showingAlert) {
             Button("OK", role: .cancel) {
