@@ -2,21 +2,25 @@ import SwiftUI
 import Shared
 
 struct ContentView: View {
-    @EnvironmentObject private var authStateManager: AuthenticationStateManager
-    @Environment(\.authRepository) private var authRepository
+    @EnvironmentObject private var authenticationViewModel: AuthenticationViewModel
     
     var body: some View {
-        Group {
-            if authStateManager.isAuthenticated {
-                HomeView()
+        ZStack {
+            if authenticationViewModel.isAuthenticated {
+                HomeView(albumsRepository: KoinHelper.companion.shared.provdeAlbumsRepository())
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .bottom).combined(with: .opacity),
+                        removal: .move(edge: .top).combined(with: .opacity)
+                    ))
+                    .zIndex(1)
             } else {
-                AuthenticationView(authRepository: authRepository) {
-                    authStateManager.login()
-                }
+                AuthenticationView()
+                    .zIndex(0)
             }
         }
+        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: authenticationViewModel.isAuthenticated)
         .onAppear {
-            authStateManager.checkAuthenticationStatus()
+            authenticationViewModel.checkAuthenticationStatus()
         }
     }
     

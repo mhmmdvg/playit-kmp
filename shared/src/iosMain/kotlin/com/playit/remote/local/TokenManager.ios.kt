@@ -8,7 +8,7 @@ actual class TokenManager {
 
     companion object {
         private const val TOKEN_KEY = "access_token"
-        private const val TOKEN_EXPIRES_KEY = "token_expires_at"
+        private const val TOKEN_EXPIRES_KEY = "expires_in"
     }
 
     actual fun saveToken(token: String) {

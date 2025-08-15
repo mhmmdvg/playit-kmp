@@ -52,7 +52,7 @@ actual fun provideHttpClient(tokenManager: TokenManager): HttpClient {
         }
 
         defaultRequest {
-            url("https://api.spotify.com/v1")
+            url("https://api.spotify.com/v1/")
             header(HttpHeaders.ContentType, ContentType.Application.Json)
         }
 

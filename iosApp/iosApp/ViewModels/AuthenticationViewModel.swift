@@ -13,6 +13,7 @@ import Shared
 enum AuthError: Error, LocalizedError {
     case invalidCallback
     case tokenExchangeFailed
+    case userCancelled
     case custom(String)
     
     var errorDescription: String? {
@@ -21,6 +22,8 @@ enum AuthError: Error, LocalizedError {
             return "Invalid authorization callback"
         case .tokenExchangeFailed:
             return "Failed to exchange authorization code for token"
+        case .userCancelled:
+            return "Authentication was cancelled"
         case .custom(let message):
             return message
         }
@@ -34,16 +37,12 @@ class AuthenticationViewModel: NSObject, ObservableObject, ASWebAuthenticationPr
     
     @Published var isLoading = false
     @Published var errorMessage: String?
-
-    public var completion: ((Bool) -> Void)?
+    @Published var isAuthenticated = false
 
     init(authenticationRepository: AuthenticationRepository) {
         self.authenticationRepository = authenticationRepository
         super.init()
-    }
-
-    public var isSigned: Bool {
-        return authenticationRepository.isUserLoggedIn()
+        checkAuthenticationStatus()
     }
 
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
@@ -108,26 +107,36 @@ class AuthenticationViewModel: NSObject, ObservableObject, ASWebAuthenticationPr
                      
                      switch completion {
                      case .failure(let error):
-                         self?.errorMessage = error.localizedDescription
-                         self?.completion?(false)
+                         if case AuthError.userCancelled = error {
+                             self?.errorMessage = nil
+                         } else {
+                             self?.errorMessage = error.localizedDescription
+                         }
                      case .finished:
                          break
                      }
                  }
              } receiveValue: { [weak self] success in
-                 DispatchQueue.main.async {
-                     self?.completion?(success)
+                 if success {
+                     self?.checkAuthenticationStatus()
                  }
              }
              .store(in: &subscriptions)
     }
     
-    func signOut() {
-        authenticationRepository.logout()
+    
+    func checkAuthenticationStatus() {
+        isAuthenticated = authenticationRepository.isUserLoggedIn()
     }
     
-    func getToken() {
-        authenticationRepository.getAccessToken()
+    func getAccessToken() -> String? {
+        return authenticationRepository.getAccessToken()
     }
+    
+    func logout() {
+        authenticationRepository.logout()
+        checkAuthenticationStatus()
+    }
+
 
 }

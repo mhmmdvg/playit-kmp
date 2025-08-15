@@ -3,21 +3,19 @@ import Shared
 
 @main
 struct iOSApp: App {
-    @StateObject private var dependencyContainer = DependencyContainer.shared
-    @StateObject private var authStateManager: AuthenticationStateManager
+    @StateObject private var authenticationViewModel: AuthenticationViewModel
     
     init() {
         KoinBridge().doInitKoin()
         
         let container = DependencyContainer.shared
-        self._authStateManager = StateObject(wrappedValue: AuthenticationStateManager(authRepository: container.authRepository))
+        self._authenticationViewModel = StateObject(wrappedValue: AuthenticationViewModel(authenticationRepository: KoinHelper.companion.shared.provideAuthenticationRepository()))
     }
     
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(authStateManager)
-                .environment(\.authRepository, dependencyContainer.authRepository)
+                .environmentObject(authenticationViewModel)
         }
     }
 }

@@ -21,8 +21,7 @@ class CurrentPlaylistsViewModelWrapper: ObservableObject {
     
     init(playlistsRepository: PlaylistsRepository) {
         self.viewModel = CurrentPlaylistsViewModel(playlistsRepository: playlistsRepository)
-        
-        
+    
     }
     
     deinit {
