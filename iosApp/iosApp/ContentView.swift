@@ -7,12 +7,16 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             if authenticationViewModel.isAuthenticated {
-                HomeView(albumsRepository: KoinHelper.companion.shared.provdeAlbumsRepository())
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .bottom).combined(with: .opacity),
-                        removal: .move(edge: .top).combined(with: .opacity)
-                    ))
-                    .zIndex(1)
+                HomeView(
+                    playlistsRepository: KoinHelper.companion.shared.providePlaylistsRepository(),
+                    albumsRepository: KoinHelper.companion.shared.provideAlbumsRepository(),
+                    tracksRepository: KoinHelper.companion.shared.provideTracksRepository()
+                )
+                .transition(.asymmetric(
+                    insertion: .move(edge: .bottom).combined(with: .opacity),
+                    removal: .move(edge: .top).combined(with: .opacity)
+                ))
+                .zIndex(1)
             } else {
                 AuthenticationView()
                     .zIndex(0)

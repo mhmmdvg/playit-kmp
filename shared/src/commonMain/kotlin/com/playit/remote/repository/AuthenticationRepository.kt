@@ -5,6 +5,8 @@ import com.playit.domain.models.AuthenticationError
 import com.playit.domain.models.AuthenticationResponse
 import com.playit.remote.local.TokenManager
 import com.playit.remote.resources.Resource
+import com.playit.utils.CommonFlow
+import com.playit.utils.asCommonFlow
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.submitForm
@@ -23,9 +25,19 @@ class AuthenticationRepository(
 ) {
     private val _authStateFlow = MutableStateFlow(isUserLoggedIn())
     val authStateFlow: StateFlow<Boolean> = _authStateFlow.asStateFlow()
+    val authStateCommonFlow: CommonFlow<Boolean> = _authStateFlow.asCommonFlow()
+
     fun isUserLoggedIn(): Boolean {
         return tokenManager.getToken() != null
     }
+
+//    fun validateAndUpdateAuthState() {
+//        val currentAuthState = isUserLoggedIn()
+//
+//        if(_authStateFlow.value != currentAuthState) {
+//            _authStateFlow.value = currentAuthState
+//        }
+//    }
 
     fun exchangeCodeForToken(
         code: String,

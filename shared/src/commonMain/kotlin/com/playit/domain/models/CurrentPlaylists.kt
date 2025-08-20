@@ -7,9 +7,9 @@ import kotlinx.serialization.Serializable
 data class CurrentPlaylistsResponse(
     val href: String,
     val limit: Int,
-    val next: String,
+    val next: String? = null,
     val offset: Int,
-    val previous: String,
+    val previous: String? = null,
     val total: Int,
     val items: List<PlaylistItems>
 )
@@ -40,15 +40,15 @@ data class ExternalUrls(
 
 @Serializable
 data class Image(
-    val height: Int,
+    val height: Int? = null,
     val url: String,
-    val width: Int
+    val width: Int? = null
 )
 
 @Serializable
 data class Owner(
     @SerialName("display_name")
-    val displayName: String,
+    val displayName: String? = null,
     @SerialName("external_urls")
     val externalUrls: ExternalUrls,
     val href: String,

@@ -11,8 +11,13 @@ actual class TokenManager {
         private const val TOKEN_EXPIRES_KEY = "expires_in"
     }
 
-    actual fun saveToken(token: String) {
+    actual fun saveToken(token: String, expiresIn: Long) {
         NSUserDefaults.standardUserDefaults.setObject(token, TOKEN_KEY)
+
+        val currentTime = NSDate().timeIntervalSince1970
+        val expirationTime = currentTime + expiresIn
+
+        NSUserDefaults.standardUserDefaults.setDouble(expirationTime, TOKEN_EXPIRES_KEY)
         NSUserDefaults.standardUserDefaults.synchronize()
     }
 
@@ -22,7 +27,6 @@ actual class TokenManager {
         if (token.isNullOrEmpty()) return null
 
         if (isTokenExpired(token)) {
-            clearToken()
             return null
         }
 
@@ -33,17 +37,13 @@ actual class TokenManager {
         return try {
             val expirationTime = NSUserDefaults.standardUserDefaults.doubleForKey(TOKEN_EXPIRES_KEY)
 
-            if (expirationTime == 0.0) {
-                return false
-            }
-
             val currentTime = NSDate().timeIntervalSince1970
             val isExpired = currentTime >= expirationTime
 
             isExpired
         } catch (error: Exception) {
             error.printStackTrace()
-            false
+            true
         }
     }
 

@@ -10,12 +10,17 @@ import Shared
 
 struct HomeView: View {
     @EnvironmentObject private var authViewModel: AuthenticationViewModel
+    
+    @StateObject private var currentPlaylistsVm: CurrentPlaylistsViewModelWrapper
     @StateObject private var newReleasesVm: NewReleasesViewModelWrapper
+    @StateObject private var severalTracksVm: TracksViewModelWrapper
     
     @State private var search = ""
     
-    init(albumsRepository: AlbumsRepository) {
+    init(playlistsRepository: PlaylistsRepository, albumsRepository: AlbumsRepository, tracksRepository: TracksRepository) {
+        self._currentPlaylistsVm = StateObject(wrappedValue: CurrentPlaylistsViewModelWrapper(playlistsRepository: playlistsRepository))
         self._newReleasesVm = StateObject(wrappedValue: NewReleasesViewModelWrapper(albumsRepository: albumsRepository))
+        self._severalTracksVm = StateObject(wrappedValue: TracksViewModelWrapper(tracksRepository: tracksRepository))
     }
     
     var body: some View {
@@ -36,40 +41,18 @@ struct HomeView: View {
                         newAlbumsData: newReleasesVm.newReleasesData?.albums.items
                     )
                     
-                    HStack {
-                        Text("Song List")
-                            .font(.system(size: 26, weight: .bold))
-                        Spacer()
-                        Button(action: {}) {
-                            Text("See all")
-                        }
-                    }
-                    
-                    VStack(spacing: 12) {
-                        ForEach(1...3, id: \.self) { index in
-                            Button(action: {}) {
-                                HStack(spacing: 16) {
-                                    SongImage(url: "https://avatar.vercel.sh/jane")
-                                        .shadow(color: .purple.opacity(0.3), radius: 8, x: 0, y: 4)
-                                    
-                                    VStack(alignment: .leading) {
-                                        Text("Song \(index)")
-                                            .font(.system(size: 16, weight: .semibold))
-                                            .foregroundStyle(Color.primary)
-                                        
-                                        Text("Artist \(index)")
-                                            .font(.system(size: 14, weight: .regular))
-                                            .foregroundStyle(.gray)
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    SongsList(
+                        isLoading: newReleasesVm.isLoading,
+                        errorMessage: newReleasesVm.errorMessage ?? "",
+                        songsData: newReleasesVm.newReleasesData?.albums.items
+                    )
                 }
                 .padding()
             }
             .onAppear {
+                currentPlaylistsVm.getCurrentPlaylists()
                 newReleasesVm.getNewReleases()
+                severalTracksVm.getSeveralTracks()
             }
             .navigationTitle("Music")
             .searchable(text: $search, prompt: "Search songs, artits, albums")
@@ -109,77 +92,6 @@ struct AlbumOverview: View {
                             .scaleEffect(0.7)
                     }
             }
-        }
-    }
-}
-
-struct AlbumImage: View {
-    let url: String
-    
-    var body: some View {
-        CacheImage(url: URL(string: url)!) { phase in
-            if let image = phase.image {
-                image
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 110)
-                    .clipped()
-                    .cornerRadius(16)
-            } else if phase.error != nil {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 110)
-                    .overlay {
-                        Image(systemName: "photo")
-                            .foregroundStyle(.gray)
-                    }
-            } else {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 110)
-                    .overlay {
-                        ProgressView()
-                            .scaleEffect(0.7)
-                    }
-            }
-        }
-    }
-}
-
-struct SongImage: View {
-    let url: String
-    
-    var body: some View {
-        CacheImage(url: URL(string: url)!) { phase in
-            if let image = phase.image {
-                image
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 60, height: 60)
-                    .clipped()
-                    .cornerRadius(16)
-                
-            } else if phase.error != nil {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 60, height: 60)
-                    .overlay(
-                        Image(systemName: "photo")
-                            .foregroundColor(.gray)
-                    )
-            } else {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 60, height: 60)
-                    .overlay(
-                        ProgressView()
-                            .scaleEffect(0.7)
-                    )
-            }
-            
         }
     }
 }

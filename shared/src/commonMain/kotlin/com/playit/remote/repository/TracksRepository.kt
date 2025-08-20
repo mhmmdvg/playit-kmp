@@ -1,0 +1,25 @@
+package com.playit.remote.repository
+
+import com.playit.domain.models.SeveralTracks
+import com.playit.remote.api.TracksApi
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.serialization.json.Json
+
+class TracksRepository(
+    private val tracksApi: TracksApi
+) {
+    suspend fun getSeveralTracks(): Result<SeveralTracks> {
+        return try {
+            val res = tracksApi.getSeveralTracks()
+            Result.success(res)
+        } catch(error: ClientRequestException) {
+            val errorBody = error.response.body<String>()
+            val errorResponse = Json.decodeFromString<Any>(errorBody)
+            Result.failure(Exception(errorResponse.toString()))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}

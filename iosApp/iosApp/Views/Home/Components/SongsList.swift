@@ -1,30 +1,30 @@
 //
-//  NewAlbums.swift
+//  SongsList.swift
 //  iosApp
 //
-//  Created by Muhammad Vikri on 15/08/25.
+//  Created by Muhammad Vikri on 17/08/25.
 //
 
 import SwiftUI
 import Shared
 
-struct NewAlbums: View {
+struct SongsList: View {
     let isLoading: Bool
     let errorMessage: String
-    let newAlbumsData: [Item]?
+    let songsData: [Item]?
     
-    @State private var pressedAlbumId: String? = nil
+    @State private var pressedSongId: String? = nil
     
-    private func handleAlbumTap(_ albumId: String) {
+    private func handleSongTap(_ songId: String) {
         let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
         impactFeedback.impactOccurred()
         
-        print("album \(albumId)")
+        print("Song id \(songId)")
     }
     
     var body: some View {
         HStack {
-            Text("New Albums")
+            Text("Song List")
                 .font(.system(size: 26, weight: .bold))
             Spacer()
             Button(action: {}) {
@@ -32,7 +32,7 @@ struct NewAlbums: View {
             }
         }
         
-        HStack(alignment: .top, spacing: 16) {
+        VStack(alignment: .leading, spacing: 12) {
             if isLoading {
                 Spacer()
                 ProgressView()
@@ -40,36 +40,32 @@ struct NewAlbums: View {
                 Spacer()
             } else if errorMessage != "" {
                 Text("Error: \(errorMessage)")
-                    .foregroundColor(.red)
+                    .foregroundStyle(.red)
                     .padding()
-            } else if let albumsData = newAlbumsData {
-                ForEach(albumsData.prefix(3), id: \.id) { item in
+            } else if let songsData = songsData {
+                ForEach(songsData.suffix(3), id: \.id) { item in
                     Button(action: {}) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            AlbumImage(url: item.images[0].url)
-                                .shadow(color: .purple.opacity(0.5), radius: 8, x: 0, y: 4)
+                        HStack(spacing: 16) {
+                            SongImage(url: item.images[0].url)
+                                .shadow(color: .purple.opacity(0.3), radius: 8, x: 0, y: 4)
+                            
                             VStack(alignment: .leading) {
                                 Text(item.name)
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundStyle(Color.primary)
-                                    .multilineTextAlignment(.leading)
-                                    .lineLimit(2)
-                                    .truncationMode(.tail)
+                                
                                 Text(item.artists[0].name)
                                     .font(.system(size: 14, weight: .regular))
                                     .foregroundStyle(.gray)
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
                             }
-                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
-                    .scaleEffect(pressedAlbumId == item.id ? 0.95 : 1.0)
-                    .animation(.easeInOut(duration: 0.1), value: pressedAlbumId)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .scaleEffect(pressedSongId == item.id ? 0.95 : 1.0)
+                    .animation(.easeInOut(duration: 0.1), value: pressedSongId)
                     .contextMenu(menuItems: {
                         Button(action: {
-                            handleAlbumTap(item.id)
+                            handleSongTap(item.id)
                         }) {
                             Label("Play", systemImage: "play.fill")
                         }
@@ -126,53 +122,50 @@ struct NewAlbums: View {
                                 .fill(.regularMaterial)
                         )
                     })
-                    .onLongPressGesture(minimumDuration: 0, maximumDistance: .infinity, pressing: { isPressing in
+                    .onLongPressGesture(minimumDuration: 0, maximumDistance: .infinity) {
+                        handleSongTap(item.id)
+                    } onPressingChanged: { isPressing in
                         withAnimation(.easeInOut(duration: 0.1)) {
-                            pressedAlbumId = isPressing ? item.id : nil
+                            pressedSongId = isPressing ? item.id : nil
                         }
-                    }, perform: {
-                        handleAlbumTap(item.id)
-                    })
-                    .frame(maxWidth: .infinity, alignment: .top)
+                    }
                 }
             }
         }
     }
 }
 
-struct AlbumImage: View {
+struct SongImage: View {
     let url: String
-    var height: CGFloat = 110
     
     var body: some View {
         CacheImage(url: URL(string: url)!) { phase in
             if let image = phase.image {
                 image
                     .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: height)
+                    .scaledToFill()
+                    .frame(width: 60, height: 60)
                     .clipped()
                     .cornerRadius(16)
+                
             } else if phase.error != nil {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color.gray.opacity(0.3))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: height)
-                    .overlay {
+                    .frame(width: 60, height: 60)
+                    .overlay(
                         Image(systemName: "photo")
-                            .foregroundStyle(.gray)
-                    }
+                            .foregroundColor(.gray)
+                    )
             } else {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color.gray.opacity(0.3))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: height)
-                    .overlay {
+                    .frame(width: 60, height: 60)
+                    .overlay(
                         ProgressView()
                             .scaleEffect(0.7)
-                    }
+                    )
             }
+            
         }
     }
 }
