@@ -8,7 +8,6 @@ struct iOSApp: App {
     init() {
         KoinBridge().doInitKoin()
         
-        let container = DependencyContainer.shared
         self._authenticationViewModel = StateObject(wrappedValue: AuthenticationViewModel(authenticationRepository: KoinHelper.companion.shared.provideAuthenticationRepository()))
     }
     

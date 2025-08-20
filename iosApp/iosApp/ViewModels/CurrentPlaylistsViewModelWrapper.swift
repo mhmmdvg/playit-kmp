@@ -12,6 +12,7 @@ import Shared
 @MainActor
 class CurrentPlaylistsViewModelWrapper: ObservableObject {
     private let viewModel: CurrentPlaylistsViewModel
+    
     @Published var currentPlaylists: Resource<CurrentPlaylistsResponse> = ResourceSuccess(data: nil)
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
@@ -22,6 +23,7 @@ class CurrentPlaylistsViewModelWrapper: ObservableObject {
     init(playlistsRepository: PlaylistsRepository) {
         self.viewModel = CurrentPlaylistsViewModel(playlistsRepository: playlistsRepository)
     
+        startObserving()
     }
     
     deinit {
@@ -30,6 +32,10 @@ class CurrentPlaylistsViewModelWrapper: ObservableObject {
     
     func clearError() {
         errorMessage = nil
+    }
+    
+    func getCurrentPlaylists() {
+        viewModel.getCurrentPlaylists()
     }
     
     private func startObserving() {
@@ -51,6 +57,7 @@ class CurrentPlaylistsViewModelWrapper: ObservableObject {
         if resource is ResourceLoading {
             isLoading = true
         } else if let successResource = resource as? ResourceSuccess<CurrentPlaylistsResponse> {
+            print("Check 2 \(String(describing: successResource.data))")
             currentPlaylistsData = successResource.data
         } else if let errorResource = resource as? ResourceError<CurrentPlaylistsResponse> {
             errorMessage = errorResource.message

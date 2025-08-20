@@ -137,6 +137,4 @@ class AuthenticationViewModel: NSObject, ObservableObject, ASWebAuthenticationPr
         authenticationRepository.logout()
         checkAuthenticationStatus()
     }
-
-
 }

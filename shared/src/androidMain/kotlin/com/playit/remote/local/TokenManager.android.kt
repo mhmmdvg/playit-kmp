@@ -17,7 +17,7 @@ actual class TokenManager(
         private const val TOKEN_EXPIRES_KEY = "expires_in"
     }
 
-    actual fun saveToken(token: String) {
+    actual fun saveToken(token: String, expiresIn: Int) {
         sharedPreferences.edit { putString(TOKEN_KEY, token) }
     }
 
