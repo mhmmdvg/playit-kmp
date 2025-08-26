@@ -25,6 +25,7 @@ kotlin {
             implementation(libs.koin.androidx.compose)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.androidx.browser)
+            implementation(libs.icons.lucide)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

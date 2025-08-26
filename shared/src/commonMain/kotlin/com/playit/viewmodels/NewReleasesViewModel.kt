@@ -7,6 +7,8 @@ import com.playit.utils.CommonFlow
 import com.playit.utils.asCommonFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,13 +16,15 @@ import kotlinx.coroutines.launch
 
 class NewReleasesViewModel(
     private val albumsRepository: AlbumsRepository
-) {
-    private val viewModelScope = CoroutineScope(Dispatchers.Main)
-
-    private val _newReleases = MutableStateFlow<Resource<NewReleasesResponse>>(Resource.Success(null))
+) : BaseViewModel() {
+    private val _newReleases = MutableStateFlow<Resource<NewReleasesResponse>>(Resource.Loading())
     val newReleases: StateFlow<Resource<NewReleasesResponse>> = _newReleases.asStateFlow()
 
     val newReleasesFlow: CommonFlow<Resource<NewReleasesResponse>> = _newReleases.asCommonFlow()
+
+    init {
+        getNewReleases()
+    }
 
     fun getNewReleases() {
         viewModelScope.launch {
@@ -39,5 +43,9 @@ class NewReleasesViewModel(
                 _newReleases.value = Resource.Error(error.message ?: "Something went wrong")
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
     }
 }

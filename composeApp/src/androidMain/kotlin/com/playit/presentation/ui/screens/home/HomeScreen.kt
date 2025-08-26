@@ -1,134 +1,213 @@
 package com.playit.presentation.ui.screens.home
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.playit.presentation.viewmodel.AuthenticationViewModel
-import org.koin.androidx.compose.koinViewModel
+import com.playit.presentation.ui.screens.home.components.NewAlbumCard
+import com.playit.presentation.ui.screens.home.components.SkeletonNewAlbumCard
+import com.playit.presentation.ui.screens.home.components.SkeletonSongCard
+import com.playit.presentation.ui.screens.home.components.SongCard
+import com.playit.remote.resources.Resource
+import com.playit.viewmodels.NewReleasesViewModel
+import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.koinInject
+import playit.composeapp.generated.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Preview
 fun HomeScreen(
-    authenticationViewModel: AuthenticationViewModel = koinViewModel(),
+    newReleaseVm: NewReleasesViewModel = koinInject(),
+    onScrollOffsetChanged: (Int) -> Unit = {},
+    navigationTitle: @Composable () -> Unit = {},
 ) {
-    val authState by authenticationViewModel.authUiState.collectAsState()
+    val scrollState = rememberScrollState()
+    val newRelease by newReleaseVm.newReleases.collectAsState()
 
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Home",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            )
+    DisposableEffect(Unit) {
+        onDispose {
+            newReleaseVm.onCleared()
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Welcome text
-            Text(
-                text = "Welcome to the main app!",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(16.dp)
+    }
+
+    LaunchedEffect(scrollState.value) {
+        onScrollOffsetChanged(scrollState.value)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White,
+                        Color(0xFFFAFAFA)
+                    )
+                )
             )
+            .verticalScroll(scrollState),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Large title section
+        navigationTitle()
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Debug info card
-            Card(
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = "Your personalized dashboard",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                ),
-                shape = RoundedCornerShape(8.dp)
+                    .padding(bottom = 32.dp),
+                textAlign = TextAlign.Start
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(132.dp)
+                    .background(
+                        color = Color.Gray,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+            )
+
+            Spacer(modifier = Modifier.height(22.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
+                Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = "New Releases",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Start,
+                )
+                TextButton(
+                    onClick = { Log.d("HomeScreen", "New Releases") }
                 ) {
                     Text(
-                        text = "Debug Info:",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
+                        text = "See All",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Start,
                     )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "Logged in: ${if (authState.isAuthenticated) "Yes" else "No"}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    if (!authenticationViewModel.getToken().isNullOrEmpty()) {
-                        Text(
-                            text = "Token: ${authenticationViewModel.getToken()?.take(20)}...",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF4CAF50) // Green color
-                        )
-                    } else {
-                        Text(
-                            text = "Token: Not found",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFFF44336) // Red color
-                        )
-                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            when(newRelease) {
+                is Resource.Loading -> {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(22.dp, alignment = Alignment.CenterHorizontally),
+                    ) {
+                        (1..3).forEach {
+                            SkeletonNewAlbumCard(
+                                modifier = Modifier.weight(0.3f)
+                            )
+                        }
+                    }
+                }
+                is Resource.Success -> {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(22.dp, alignment = Alignment.CenterHorizontally),
+                    ) {
+                        (newRelease.data?.albums?.items?.take(3)?.forEach { album ->
+                            NewAlbumCard(
+                                modifier = Modifier.weight(0.3f),
+                                albumData = album,
+                                onClick = { Log.d("HomeScreen", "New Album") }
+                            )
+                        })
+                    }
+                }
+                is Resource.Error -> {}
+            }
 
-            // Sign out button
-            Button(
-                onClick = {
-                    authenticationViewModel.signOut()
-                },
-                modifier = Modifier.padding(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFF44336) // Red background
-                ),
-                shape = RoundedCornerShape(8.dp)
+            Spacer(modifier = Modifier.height(22.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Sign Out",
-                    color = Color.White,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = "Song List",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Start,
                 )
+                TextButton(
+                    onClick = { Log.d("HomeScreen", "Song List") }
+                ) {
+                    Text(
+                        text = "See All",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Start,
+                    )
+                }
             }
+
+            when(newRelease) {
+                is Resource.Loading -> {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(5.dp),
+                    ) {
+                        (1..3).forEach {
+                            SkeletonSongCard(
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
+                }
+                is Resource.Success -> {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(5.dp),
+                    ) {
+                        newRelease.data?.albums?.items?.takeLast(3)?.forEach { album ->
+                            SongCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                album = album,
+                                onClick = { Log.d("HomeScreen", "Song") }
+                            )
+                        }
+                    }
+                }
+                is Resource.Error -> {}
+            }
+
+            // Bottom safe area
+            Spacer(modifier = Modifier.height(40.dp))
         }
     }
 }
