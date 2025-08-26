@@ -27,6 +27,7 @@ actual class TokenManager {
         if (token.isNullOrEmpty()) return null
 
         if (isTokenExpired(token)) {
+            clearToken()
             return null
         }
 

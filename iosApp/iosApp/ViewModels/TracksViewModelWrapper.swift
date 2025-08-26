@@ -26,7 +26,6 @@ class TracksViewModelWrapper: ObservableObject {
     }
     
     func getSeveralTracks() {
-        print("Run 🚀")
         viewModel.getSeveralTracks()
     }
     
@@ -51,7 +50,6 @@ class TracksViewModelWrapper: ObservableObject {
         if resource is ResourceLoading {
             isLoading = true
         } else if let successResource = resource as? ResourceSuccess<SeveralTracks> {
-            print("CheckSSS \(String(describing: successResource.data))")
             severalTracksData = successResource.data
         } else if let errorResource = resource as? ResourceError<SeveralTracks> {
             errorMessage = errorResource.message

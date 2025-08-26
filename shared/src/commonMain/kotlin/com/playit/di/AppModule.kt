@@ -13,26 +13,25 @@ import com.playit.viewmodels.TracksViewModel
 import org.koin.dsl.module
 
 val appModule = module {
+//    API
+    single { PlaylistsApi(get()) }
+    single { AlbumsApi(get()) }
+    single { TracksApi(get()) }
+
+//    Repository
     single {
         AuthenticationRepository(
             tokenManager = get(),
             httpClient = get()
         )
     }
-
-//    Playlists DI
-    single { PlaylistsApi(get()) }
     single { PlaylistsRepository(get()) }
-    single { CurrentPlaylistsViewModel(get()) }
-
-
-//    Albums DI
-    single { AlbumsApi(get()) }
     single { AlbumsRepository(get()) }
-    single { NewReleasesViewModel(get()) }
-
-//    Tracks DI
-    single { TracksApi(get()) }
     single { TracksRepository(get()) }
-    single { TracksViewModel(get()) }
+
+
+//    View Models
+    factory { CurrentPlaylistsViewModel(get()) }
+    factory<NewReleasesViewModel> { NewReleasesViewModel(get()) }
+    factory { TracksViewModel(get()) }
 }
