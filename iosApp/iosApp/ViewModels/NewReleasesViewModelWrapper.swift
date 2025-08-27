@@ -19,8 +19,8 @@ class NewReleasesViewModelWrapper: ObservableObject {
     
     private var closeable: FlowCloseable?
     
-    init(albumsRepository: AlbumsRepository) {
-        self.viewModel = NewReleasesViewModel(albumsRepository: albumsRepository)
+    init(albumsRepository: AlbumsRepositoryImpl) {
+        self.viewModel = NewReleasesViewModel(albumsRepositoryImpl: albumsRepository)
         
         startObserving()
     }

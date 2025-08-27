@@ -6,7 +6,7 @@ struct iOSApp: App {
     @StateObject private var authenticationViewModel: AuthenticationViewModel
     
     init() {
-        KoinBridge().doInitKoin()
+        KoinBridgeKt.doInitKoin(platformModules: nil)
         
         self._authenticationViewModel = StateObject(wrappedValue: AuthenticationViewModel(authenticationRepository: KoinHelper.companion.shared.provideAuthenticationRepository()))
     }

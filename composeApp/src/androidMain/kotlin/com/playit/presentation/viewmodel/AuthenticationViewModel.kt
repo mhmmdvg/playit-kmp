@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.playit.constants.SpotifyConfig
 import com.playit.presentation.ui.screens.authentication.AuthenticationState
-import com.playit.remote.repository.AuthenticationRepository
+import com.playit.remote.repository.AuthenticationRepositoryImpl
 import com.playit.remote.resources.Resource
 import com.playit.utils.OAuthCallbackManager
 import kotlinx.coroutines.Job
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class AuthenticationViewModel(
-    private val authenticationRepository: AuthenticationRepository
+    private val authenticationRepositoryImpl: AuthenticationRepositoryImpl
 ) : ViewModel() {
 
     private val _authUiState = MutableStateFlow(AuthenticationState())
@@ -52,7 +52,7 @@ class AuthenticationViewModel(
     }
 
     fun getToken(): String? {
-        return authenticationRepository.getAccessToken()
+        return authenticationRepositoryImpl.getAccessToken()
     }
 
     private fun startOAuthTimeout() {
@@ -101,7 +101,7 @@ class AuthenticationViewModel(
         OAuthCallbackManager.resetCustomTabLaunched()
 
         viewModelScope.launch {
-            authenticationRepository.exchangeCodeForToken(code) { result ->
+            authenticationRepositoryImpl.exchangeCodeForToken(code) { result ->
                 when (result) {
                     is Resource.Success -> {
                         _authUiState.value = _authUiState.value.copy(
@@ -159,7 +159,7 @@ class AuthenticationViewModel(
     }
 
     fun signOut() {
-        authenticationRepository.logout()
+        authenticationRepositoryImpl.logout()
         _authUiState.value = _authUiState.value.copy(isAuthenticated = false)
         onOAuthCancelled()
     }
@@ -169,7 +169,7 @@ class AuthenticationViewModel(
     }
 
     private fun checkAuthenticationStatus() {
-        val isAuthenticated = authenticationRepository.isUserLoggedIn()
+        val isAuthenticated = authenticationRepositoryImpl.isUserLoggedIn()
         _authUiState.value = _authUiState.value.copy(isAuthenticated = isAuthenticated)
     }
 

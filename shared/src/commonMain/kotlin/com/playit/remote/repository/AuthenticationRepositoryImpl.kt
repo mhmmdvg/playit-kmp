@@ -3,6 +3,7 @@ package com.playit.remote.repository
 import com.playit.constants.SpotifyConfig
 import com.playit.domain.models.AuthenticationError
 import com.playit.domain.models.AuthenticationResponse
+import com.playit.domain.repository.AuthenticationRepository
 import com.playit.remote.local.TokenManager
 import com.playit.remote.resources.Resource
 import com.playit.utils.CommonFlow
@@ -19,27 +20,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class AuthenticationRepository(
+class AuthenticationRepositoryImpl(
     private val tokenManager: TokenManager,
     private val httpClient: HttpClient
-) {
+) : AuthenticationRepository {
     private val _authStateFlow = MutableStateFlow(isUserLoggedIn())
     val authStateFlow: StateFlow<Boolean> = _authStateFlow.asStateFlow()
     val authStateCommonFlow: CommonFlow<Boolean> = _authStateFlow.asCommonFlow()
 
-    fun isUserLoggedIn(): Boolean {
+    override fun isUserLoggedIn(): Boolean {
         return tokenManager.getToken() != null
     }
 
-//    fun validateAndUpdateAuthState() {
-//        val currentAuthState = isUserLoggedIn()
-//
-//        if(_authStateFlow.value != currentAuthState) {
-//            _authStateFlow.value = currentAuthState
-//        }
-//    }
-
-    fun exchangeCodeForToken(
+    override fun exchangeCodeForToken(
         code: String,
         completion: (Resource<Boolean>) -> Unit
     ) {
@@ -74,16 +67,16 @@ class AuthenticationRepository(
         }
     }
 
-    fun logout() {
+    override fun logout() {
         tokenManager.clearToken()
         _authStateFlow.value = false
     }
 
-    fun getAccessToken(): String? {
+    override fun getAccessToken(): String? {
         return tokenManager.getToken()
     }
 
-    fun refreshAuthState() {
+    override fun refreshAuthState() {
         _authStateFlow.value = isUserLoggedIn()
     }
 }

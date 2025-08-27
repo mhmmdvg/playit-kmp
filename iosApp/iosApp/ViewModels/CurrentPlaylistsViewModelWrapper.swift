@@ -20,8 +20,8 @@ class CurrentPlaylistsViewModelWrapper: ObservableObject {
     
     private var closeable: FlowCloseable?
     
-    init(playlistsRepository: PlaylistsRepository) {
-        self.viewModel = CurrentPlaylistsViewModel(playlistsRepository: playlistsRepository)
+    init(playlistsRepository: PlaylistsRepositoryImpl) {
+        self.viewModel = CurrentPlaylistsViewModel(playlistsRepositoryImpl: playlistsRepository)
     
         startObserving()
     }

@@ -1,16 +1,16 @@
 package com.playit.remote.repository
 
 import com.playit.domain.models.SeveralTracks
+import com.playit.domain.repository.TracksRepository
 import com.playit.remote.api.TracksApi
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.serialization.json.Json
 
-class TracksRepository(
+class TracksRepositoryImpl(
     private val tracksApi: TracksApi
-) {
-    suspend fun getSeveralTracks(): Result<SeveralTracks> {
+) : TracksRepository {
+    override suspend fun getSeveralTracks(): Result<SeveralTracks> {
         return try {
             val res = tracksApi.getSeveralTracks()
             Result.success(res)
@@ -21,5 +21,9 @@ class TracksRepository(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    override fun invalidateCache() {
+        TODO("Not yet implemented")
     }
 }
