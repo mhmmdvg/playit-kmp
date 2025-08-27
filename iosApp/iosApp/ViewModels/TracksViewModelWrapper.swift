@@ -19,8 +19,8 @@ class TracksViewModelWrapper: ObservableObject {
     
     private var closeable: FlowCloseable?
     
-    init(tracksRepository: TracksRepository) {
-        self.viewModel = TracksViewModel(tracksRepository: tracksRepository)
+    init(tracksRepository: TracksRepositoryImpl) {
+        self.viewModel = TracksViewModel(tracksRepositoryImpl: tracksRepository)
         
         startObserving()
     }

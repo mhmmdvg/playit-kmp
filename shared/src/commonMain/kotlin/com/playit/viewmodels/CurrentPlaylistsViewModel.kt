@@ -1,7 +1,7 @@
 package com.playit.viewmodels
 
 import com.playit.domain.models.CurrentPlaylistsResponse
-import com.playit.remote.repository.PlaylistsRepository
+import com.playit.remote.repository.PlaylistsRepositoryImpl
 import com.playit.remote.resources.Resource
 import com.playit.utils.CommonFlow
 import com.playit.utils.asCommonFlow
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class CurrentPlaylistsViewModel(
-    private val playlistsRepository: PlaylistsRepository
+    private val playlistsRepositoryImpl: PlaylistsRepositoryImpl
 ) {
     private val viewModelScope = CoroutineScope(Dispatchers.Main)
 
@@ -26,7 +26,7 @@ class CurrentPlaylistsViewModel(
             _currentPlaylists.value = Resource.Loading()
 
             try {
-                playlistsRepository.getCurrentPlaylists().fold(
+                playlistsRepositoryImpl.getCurrentPlaylists().fold(
                     onSuccess = {
                         _currentPlaylists.value = Resource.Success(it)
                     },

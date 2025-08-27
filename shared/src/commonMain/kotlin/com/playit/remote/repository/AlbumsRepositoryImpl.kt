@@ -1,6 +1,7 @@
 package com.playit.remote.repository
 
 import com.playit.domain.models.NewReleasesResponse
+import com.playit.domain.repository.AlbumRepository
 import com.playit.remote.api.AlbumsApi
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
@@ -11,13 +12,13 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
-class AlbumsRepository(
+class AlbumsRepositoryImpl(
     private val albumsApi: AlbumsApi
-) {
+) : AlbumRepository {
     private var _newReleaseCache: Pair<NewReleasesResponse, Instant>? = null
     private val cacheValidityDuration = 15.minutes
 
-    suspend fun getNewReleases(): Result<NewReleasesResponse> {
+    override suspend fun getNewReleases(): Result<NewReleasesResponse> {
         _newReleaseCache?.let { (data, timestamp) ->
             val now = Clock.System.now()
             if (now - timestamp < cacheValidityDuration) {
@@ -37,7 +38,7 @@ class AlbumsRepository(
         }
     }
 
-    fun invalidateCache() {
+    override fun invalidateCache() {
         _newReleaseCache = null
     }
 }

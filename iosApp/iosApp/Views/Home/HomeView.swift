@@ -17,7 +17,7 @@ struct HomeView: View {
     
     @State private var search = ""
     
-    init(playlistsRepository: PlaylistsRepository, albumsRepository: AlbumsRepository, tracksRepository: TracksRepository) {
+    init(playlistsRepository: PlaylistsRepositoryImpl, albumsRepository: AlbumsRepositoryImpl, tracksRepository: TracksRepositoryImpl) {
         self._currentPlaylistsVm = StateObject(wrappedValue: CurrentPlaylistsViewModelWrapper(playlistsRepository: playlistsRepository))
         self._newReleasesVm = StateObject(wrappedValue: NewReleasesViewModelWrapper(albumsRepository: albumsRepository))
         self._severalTracksVm = StateObject(wrappedValue: TracksViewModelWrapper(tracksRepository: tracksRepository))

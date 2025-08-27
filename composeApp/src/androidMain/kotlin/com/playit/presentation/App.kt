@@ -23,7 +23,7 @@ import com.playit.presentation.ui.components.AppBar
 import com.playit.presentation.ui.components.NavigationTitle
 import com.playit.presentation.ui.screens.authentication.AuthenticationScreen
 import com.playit.presentation.ui.screens.home.HomeScreen
-import com.playit.remote.repository.AuthenticationRepository
+import com.playit.remote.repository.AuthenticationRepositoryImpl
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import kotlin.math.max
@@ -38,11 +38,11 @@ fun App(
 ) {
 
     val navController = rememberNavController()
-    val authenticationRepository: AuthenticationRepository = koinInject()
+    val authenticationRepositoryImpl: AuthenticationRepositoryImpl = koinInject()
     var scrollOffset by remember { mutableIntStateOf(0) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val isAuthenticated by authenticationRepository.authStateFlow.collectAsState()
+    val isAuthenticated by authenticationRepositoryImpl.authStateFlow.collectAsState()
 
     val currentRoute = navBackStackEntry?.destination?.route
     val maxOffset = 200
@@ -63,7 +63,7 @@ fun App(
     }
 
     val startDestination =
-        if (authenticationRepository.isUserLoggedIn()) Screen.HomeScreen.route else Screen.AuthenticationScreen.route
+        if (authenticationRepositoryImpl.isUserLoggedIn()) Screen.HomeScreen.route else Screen.AuthenticationScreen.route
 
     MaterialTheme {
         Scaffold(

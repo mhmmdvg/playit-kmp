@@ -1,7 +1,7 @@
 package com.playit.viewmodels
 
 import com.playit.domain.models.SeveralTracks
-import com.playit.remote.repository.TracksRepository
+import com.playit.remote.repository.TracksRepositoryImpl
 import com.playit.remote.resources.Resource
 import com.playit.utils.CommonFlow
 import com.playit.utils.asCommonFlow
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class TracksViewModel(
-    private val tracksRepository: TracksRepository
+    private val tracksRepositoryImpl: TracksRepositoryImpl
 ) {
     private val viewModelScope = CoroutineScope(Dispatchers.Main)
 
@@ -26,7 +26,7 @@ class TracksViewModel(
             _severalTracks.value = Resource.Loading()
 
             try {
-                tracksRepository.getSeveralTracks().fold(
+                tracksRepositoryImpl.getSeveralTracks().fold(
                     onSuccess = { success ->
                         _severalTracks.value = Resource.Success(success)
                     },

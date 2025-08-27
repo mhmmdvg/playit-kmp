@@ -33,13 +33,13 @@ enum AuthError: Error, LocalizedError {
 class AuthenticationViewModel: NSObject, ObservableObject, ASWebAuthenticationPresentationContextProviding {
     
     private var subscriptions = [AnyCancellable]()
-    private let authenticationRepository: AuthenticationRepository
+    private let authenticationRepository: AuthenticationRepositoryImpl
     
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var isAuthenticated = false
 
-    init(authenticationRepository: AuthenticationRepository) {
+    init(authenticationRepository: AuthenticationRepositoryImpl) {
         self.authenticationRepository = authenticationRepository
         super.init()
         checkAuthenticationStatus()
