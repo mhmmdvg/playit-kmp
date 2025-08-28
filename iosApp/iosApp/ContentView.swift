@@ -8,9 +8,7 @@ struct ContentView: View {
         ZStack {
             if authenticationViewModel.isAuthenticated {
                 HomeView(
-                    playlistsRepository: KoinHelper.companion.shared.providePlaylistsRepository(),
-                    albumsRepository: KoinHelper.companion.shared.provideAlbumsRepository(),
-                    tracksRepository: KoinHelper.companion.shared.provideTracksRepository()
+                    albumsRepository: KoinHelper.companion.shared.provideAlbumsRepository()
                 )
                 .transition(.asymmetric(
                     insertion: .move(edge: .bottom).combined(with: .opacity),

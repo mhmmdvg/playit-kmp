@@ -34,10 +34,7 @@ struct NewAlbums: View {
         
         HStack(alignment: .top, spacing: 16) {
             if isLoading {
-                Spacer()
-                ProgressView()
-                    .scaleEffect(1.2)
-                Spacer()
+                NewAlbumsSkeleton()
             } else if errorMessage != "" {
                 Text("Error: \(errorMessage)")
                     .foregroundColor(.red)

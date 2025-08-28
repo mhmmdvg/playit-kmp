@@ -57,7 +57,6 @@ class CurrentPlaylistsViewModelWrapper: ObservableObject {
         if resource is ResourceLoading {
             isLoading = true
         } else if let successResource = resource as? ResourceSuccess<CurrentPlaylistsResponse> {
-            print("Check 2 \(String(describing: successResource.data))")
             currentPlaylistsData = successResource.data
         } else if let errorResource = resource as? ResourceError<CurrentPlaylistsResponse> {
             errorMessage = errorResource.message

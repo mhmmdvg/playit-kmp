@@ -11,16 +11,11 @@ import Shared
 struct HomeView: View {
     @EnvironmentObject private var authViewModel: AuthenticationViewModel
     
-    @StateObject private var currentPlaylistsVm: CurrentPlaylistsViewModelWrapper
     @StateObject private var newReleasesVm: NewReleasesViewModelWrapper
-    @StateObject private var severalTracksVm: TracksViewModelWrapper
-    
     @State private var search = ""
     
-    init(playlistsRepository: PlaylistsRepositoryImpl, albumsRepository: AlbumsRepositoryImpl, tracksRepository: TracksRepositoryImpl) {
-        self._currentPlaylistsVm = StateObject(wrappedValue: CurrentPlaylistsViewModelWrapper(playlistsRepository: playlistsRepository))
+    init(albumsRepository: AlbumsRepositoryImpl) {
         self._newReleasesVm = StateObject(wrappedValue: NewReleasesViewModelWrapper(albumsRepository: albumsRepository))
-        self._severalTracksVm = StateObject(wrappedValue: TracksViewModelWrapper(tracksRepository: tracksRepository))
     }
     
     var body: some View {
@@ -34,7 +29,6 @@ struct HomeView: View {
                             .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
                     }
                     
-                    //                 New Albums
                     NewAlbums(
                         isLoading: newReleasesVm.isLoading,
                         errorMessage: newReleasesVm.errorMessage ?? "",
@@ -50,9 +44,7 @@ struct HomeView: View {
                 .padding()
             }
             .onAppear {
-                currentPlaylistsVm.getCurrentPlaylists()
                 newReleasesVm.getNewReleases()
-                severalTracksVm.getSeveralTracks()
             }
             .navigationTitle("Music")
             .searchable(text: $search, prompt: "Search songs, artits, albums")

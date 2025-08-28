@@ -63,7 +63,6 @@ class NewReleasesViewModelWrapper: ObservableObject {
         if resource is ResourceLoading {
             isLoading = true
         } else if let successResource = resource as? ResourceSuccess<NewReleasesResponse> {
-            print("Resource Data \(String(describing: successResource.data))")
             newReleasesData = successResource.data
         } else if let errorResource = resource as? ResourceError<NewReleasesResponse> {
             errorMessage = errorResource.message

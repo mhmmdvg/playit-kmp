@@ -34,10 +34,7 @@ struct SongsList: View {
         
         VStack(alignment: .leading, spacing: 12) {
             if isLoading {
-                Spacer()
-                ProgressView()
-                    .scaleEffect(1.2)
-                Spacer()
+                SongListSkeleton()
             } else if errorMessage != "" {
                 Text("Error: \(errorMessage)")
                     .foregroundStyle(.red)
