@@ -1,6 +1,9 @@
 package com.playit.di
 
+import com.playit.domain.repository.AlbumsRepository
 import com.playit.domain.repository.AuthenticationRepository
+import com.playit.domain.repository.PlaylistsRepository
+import com.playit.domain.repository.TracksRepository
 import com.playit.remote.api.AlbumsApi
 import com.playit.remote.api.PlaylistsApi
 import com.playit.remote.api.TracksApi
@@ -24,9 +27,9 @@ val appModule = module {
 
 //    Repository
     singleOf(::AuthenticationRepositoryImpl).bind<AuthenticationRepository>()
-    singleOf(::PlaylistsRepositoryImpl).bind<PlaylistsRepositoryImpl>()
-    singleOf(::AlbumsRepositoryImpl).bind<AlbumsRepositoryImpl>()
-    singleOf(::TracksRepositoryImpl).bind<TracksRepositoryImpl>()
+    singleOf(::PlaylistsRepositoryImpl).bind<PlaylistsRepository>()
+    singleOf(::AlbumsRepositoryImpl).bind<AlbumsRepository>()
+    singleOf(::TracksRepositoryImpl).bind<TracksRepository>()
 
 
 //    View Models
