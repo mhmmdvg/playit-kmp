@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.playit.constants.SpotifyConfig
 import com.playit.presentation.ui.screens.authentication.AuthenticationState
-import com.playit.remote.repository.AuthenticationRepositoryImpl
-import com.playit.remote.resources.Resource
+import com.playit.data.remote.repository.AuthenticationRepositoryImpl
+import com.playit.data.remote.resources.Resource
 import com.playit.utils.OAuthCallbackManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

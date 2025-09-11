@@ -28,6 +28,10 @@ kotlin {
     
     sourceSets {
         commonMain.dependencies {
+            // Data Store
+            implementation(libs.androidx.datastore.core)
+            implementation(libs.androidx.datastore.preferences.core)
+
             // Koin Core
             implementation(libs.koin.core)
 
@@ -48,6 +52,8 @@ kotlin {
             implementation(libs.kotlin.test)
         }
         androidMain.dependencies {
+            implementation(libs.androidx.datastore.preferences)
+
             // Koin for Android
             implementation(libs.koin.android)
 
@@ -56,6 +62,7 @@ kotlin {
             implementation(libs.ktor.client.cio)
         }
         iosMain.dependencies {
+            implementation(libs.androidx.datastore.preferences)
             implementation(libs.ktor.client.darwin)
         }
     }
