@@ -1,4 +1,4 @@
-package com.playit.remote.api
+package com.playit.data.remote.api
 
 import com.playit.domain.models.CurrentPlaylistsResponse
 import io.ktor.client.HttpClient

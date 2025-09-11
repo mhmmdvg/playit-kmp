@@ -1,6 +1,6 @@
 package com.playit.network
 
-import com.playit.remote.local.TokenManager
+import com.playit.data.remote.local.TokenManager
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpResponseValidator

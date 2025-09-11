@@ -11,6 +11,7 @@ androidx-lifecycle = "2.9.1"
 androidx-testExt = "1.2.1"
 browser = "1.6.0"
 composeMultiplatform = "1.8.2"
+datastorePreferencesCore = "1.1.7"
 iconsLucide = "1.1.0"
 junit = "4.13.2"
 kotlin = "2.2.0"
@@ -25,6 +26,9 @@ navigationCompose = "2.9.3"
 
 [libraries]
 androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
+androidx-datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastorePreferencesCore" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferencesCore" }
+androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastorePreferencesCore" }
 icons-lucide = { module = "com.composables:icons-lucide", version.ref = "iconsLucide" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinCore" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroidxCompose" }

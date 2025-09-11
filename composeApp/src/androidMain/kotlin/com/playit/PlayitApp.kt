@@ -1,6 +1,7 @@
 package com.playit
 
 import android.app.Application
+import com.playit.data.cache.DataStoreFactory
 import com.playit.di.androidModule
 import com.playit.di.initKoin
 import com.playit.di.sharedModules
@@ -11,6 +12,8 @@ class PlayitApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        DataStoreFactory.initialize(this)
 
         initKoin(
             platformModules = androidModule

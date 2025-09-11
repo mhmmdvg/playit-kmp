@@ -1,9 +1,9 @@
 package com.playit.di
 
-import com.playit.remote.repository.AlbumsRepositoryImpl
-import com.playit.remote.repository.AuthenticationRepositoryImpl
-import com.playit.remote.repository.PlaylistsRepositoryImpl
-import com.playit.remote.repository.TracksRepositoryImpl
+import com.playit.data.remote.repository.AlbumsRepositoryImpl
+import com.playit.data.remote.repository.AuthenticationRepositoryImpl
+import com.playit.data.remote.repository.PlaylistsRepositoryImpl
+import com.playit.data.remote.repository.TracksRepositoryImpl
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 

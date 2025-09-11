@@ -1,6 +1,6 @@
 package com.playit.domain.repository
 
-import com.playit.remote.resources.Resource
+import com.playit.data.remote.resources.Resource
 
 interface AuthenticationRepository {
     fun isUserLoggedIn(): Boolean

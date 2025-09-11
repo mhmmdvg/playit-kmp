@@ -1,4 +1,4 @@
-package com.playit.remote.local
+package com.playit.data.remote.local
 
 import platform.Foundation.NSDate
 import platform.Foundation.NSUserDefaults

@@ -15,6 +15,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -26,11 +27,10 @@ import com.playit.presentation.ui.screens.home.components.NewAlbumCard
 import com.playit.presentation.ui.screens.home.components.SkeletonNewAlbumCard
 import com.playit.presentation.ui.screens.home.components.SkeletonSongCard
 import com.playit.presentation.ui.screens.home.components.SongCard
-import com.playit.remote.resources.Resource
+import com.playit.data.remote.resources.Resource
 import com.playit.viewmodels.NewReleasesViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
-import playit.composeapp.generated.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,7 +41,7 @@ fun HomeScreen(
     navigationTitle: @Composable () -> Unit = {},
 ) {
     val scrollState = rememberScrollState()
-    val newRelease by newReleaseVm.newReleases.collectAsState()
+    val newRelease by remember { newReleaseVm.newReleases }.collectAsState()
 
     DisposableEffect(Unit) {
         onDispose {

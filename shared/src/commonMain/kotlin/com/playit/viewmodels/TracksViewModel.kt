@@ -1,8 +1,8 @@
 package com.playit.viewmodels
 
 import com.playit.domain.models.SeveralTracks
-import com.playit.remote.repository.TracksRepositoryImpl
-import com.playit.remote.resources.Resource
+import com.playit.data.remote.repository.TracksRepositoryImpl
+import com.playit.data.remote.resources.Resource
 import com.playit.utils.CommonFlow
 import com.playit.utils.asCommonFlow
 import kotlinx.coroutines.CoroutineScope

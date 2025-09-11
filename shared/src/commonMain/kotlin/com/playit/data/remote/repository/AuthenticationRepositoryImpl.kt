@@ -1,11 +1,11 @@
-package com.playit.remote.repository
+package com.playit.data.remote.repository
 
 import com.playit.constants.SpotifyConfig
 import com.playit.domain.models.AuthenticationError
 import com.playit.domain.models.AuthenticationResponse
 import com.playit.domain.repository.AuthenticationRepository
-import com.playit.remote.local.TokenManager
-import com.playit.remote.resources.Resource
+import com.playit.data.remote.local.TokenManager
+import com.playit.data.remote.resources.Resource
 import com.playit.utils.CommonFlow
 import com.playit.utils.asCommonFlow
 import io.ktor.client.HttpClient

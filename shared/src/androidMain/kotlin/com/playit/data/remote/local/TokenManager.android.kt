@@ -1,4 +1,4 @@
-package com.playit.remote.local
+package com.playit.data.remote.local
 
 import android.content.SharedPreferences
 import androidx.core.content.edit

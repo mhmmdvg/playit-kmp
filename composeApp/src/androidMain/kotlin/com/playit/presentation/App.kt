@@ -1,9 +1,7 @@
 package com.playit.presentation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,11 +17,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.playit.data.remote.repository.AuthenticationRepositoryImpl
 import com.playit.presentation.ui.components.AppBar
+import com.playit.presentation.ui.components.BottomNavigation
 import com.playit.presentation.ui.components.NavigationTitle
 import com.playit.presentation.ui.screens.authentication.AuthenticationScreen
 import com.playit.presentation.ui.screens.home.HomeScreen
-import com.playit.remote.repository.AuthenticationRepositoryImpl
+import com.playit.presentation.ui.screens.profile.ProfileScreen
+import com.playit.presentation.ui.screens.search.SearchScreen
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import kotlin.math.max
@@ -64,6 +65,11 @@ fun App(
 
     val startDestination =
         if (authenticationRepositoryImpl.isUserLoggedIn()) Screen.HomeScreen.route else Screen.AuthenticationScreen.route
+    val shouldBottomNav = when (currentRoute) {
+        Screen.AuthenticationScreen.route -> false
+        null -> false
+        else -> !currentRoute.startsWith(Screen.HomeScreen.route + "/")
+    }
 
     MaterialTheme {
         Scaffold(
@@ -79,6 +85,15 @@ fun App(
                             maxOffset = maxOffset,
                         )
                     }
+                }
+            },
+            bottomBar = {
+                AnimatedVisibility(
+                    visible = shouldBottomNav,
+                    enter = slideInVertically(initialOffsetY = { it }),
+                    exit = slideOutVertically(targetOffsetY = { it })
+                ) {
+                    BottomNavigation(navController)
                 }
             }
         ) { innerPadding ->
@@ -110,6 +125,10 @@ fun App(
                             ) + fadeIn(animationSpec = tween(400))
                         }
 
+                        targetState.destination.route == Screen.HomeScreen.route || targetState.destination.route == Screen.SearchScreen.route || targetState.destination.route == Screen.ProfileScreen.route -> fadeIn(
+                            animationSpec = tween(300)
+                        )
+
                         else -> slideIntoContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.Left,
                             animationSpec = tween(350)
@@ -133,6 +152,10 @@ fun App(
                                 animationSpec = tween(durationMillis = 400)
                             ) + fadeOut(animationSpec = tween(400))
                         }
+
+                        targetState.destination.route == Screen.HomeScreen.route || targetState.destination.route == Screen.SearchScreen.route || targetState.destination.route == Screen.ProfileScreen.route -> fadeOut(
+                            animationSpec = tween(300)
+                        )
 
                         else -> slideOutOfContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.Left,
@@ -161,6 +184,14 @@ fun App(
                             )
                         }
                     )
+                }
+
+                composable("search") {
+                    SearchScreen()
+                }
+
+                composable("profile") {
+                    ProfileScreen()
                 }
             }
         }

@@ -1,6 +1,6 @@
 package com.playit.network
 
-import com.playit.remote.local.TokenManager
+import com.playit.data.remote.local.TokenManager
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
 import io.ktor.client.plugins.HttpResponseValidator
@@ -18,7 +18,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import platform.posix.exception
 
 actual fun provideHttpClient(tokenManager: TokenManager): HttpClient {
     return HttpClient(Darwin) {
