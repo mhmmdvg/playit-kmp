@@ -6,25 +6,25 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.playit.domain.models.CacheData
-import com.playit.domain.models.NewReleasesResponse
+import com.playit.domain.models.CurrentPlaylistsResponse
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 
-class NewReleasesCacheStore(
+class PlaylistCacheStore(
     private val dataStore: DataStore<Preferences>
 ) {
     companion object {
-        private val NEW_RELEASES_DATA_KEY = stringPreferencesKey("new_releases_data")
-        private val NEW_RELEASES_TIMESTAMP_KEY = longPreferencesKey("new_releases_timestamp")
+        private val PLAYLIST_DATA_KEY = stringPreferencesKey("playlist_data")
+        private val PLAYLIST_TIMESTAMP_KEY = longPreferencesKey("playlist_timestamp")
     }
 
-    suspend fun saveNewReleases(data: NewReleasesResponse, timestamp: Long) {
+    suspend fun savePlaylist(data: CurrentPlaylistsResponse, timestamp: Long) {
         try {
-            val json = Json.encodeToString(NewReleasesResponse.serializer(), data)
+            val json = Json.encodeToString(CurrentPlaylistsResponse.serializer(), data)
 
             dataStore.edit { preferences ->
-                preferences[NEW_RELEASES_DATA_KEY] = json
-                preferences[NEW_RELEASES_TIMESTAMP_KEY] = timestamp
+                preferences[PLAYLIST_DATA_KEY] = json
+                preferences[PLAYLIST_TIMESTAMP_KEY] = timestamp
             }
         } catch (error: Exception) {
             error.printStackTrace()
@@ -32,14 +32,14 @@ class NewReleasesCacheStore(
         }
     }
 
-    suspend fun loadNewReleases(): CacheData<NewReleasesResponse>? {
+    suspend fun loadPlaylist(): CacheData<CurrentPlaylistsResponse>? {
         val preferences = dataStore.data.first()
-        val dataString = preferences[NEW_RELEASES_DATA_KEY]
-        val timestamp = preferences[NEW_RELEASES_TIMESTAMP_KEY]
+        val dataString = preferences[PLAYLIST_DATA_KEY]
+        val timestamp = preferences[PLAYLIST_TIMESTAMP_KEY]
 
         return if (dataString != null) {
             try {
-                val data = Json.decodeFromString(NewReleasesResponse.serializer(), dataString)
+                val data = Json.decodeFromString(CurrentPlaylistsResponse.serializer(), dataString)
                 CacheData(
                     data = data,
                     timestamp = timestamp ?: 0L
@@ -56,8 +56,8 @@ class NewReleasesCacheStore(
 
     suspend fun clearCache() {
         dataStore.edit { preferences ->
-            preferences.remove(NEW_RELEASES_DATA_KEY)
-            preferences.remove(NEW_RELEASES_TIMESTAMP_KEY)
+            preferences.remove(PLAYLIST_DATA_KEY)
+            preferences.remove(PLAYLIST_TIMESTAMP_KEY)
         }
     }
 }

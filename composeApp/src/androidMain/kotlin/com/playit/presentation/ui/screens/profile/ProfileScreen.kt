@@ -10,7 +10,8 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun ProfileScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+
 ) {
 
     Column(

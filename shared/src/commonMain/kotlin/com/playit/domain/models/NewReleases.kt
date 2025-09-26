@@ -4,12 +4,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class NewReleasesCache(
-    val data: NewReleasesResponse,
-    val timestamp: Long
-)
-
-@Serializable
 data class NewReleasesResponse(
     val albums: Albums
 )

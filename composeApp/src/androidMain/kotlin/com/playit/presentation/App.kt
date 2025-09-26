@@ -23,6 +23,7 @@ import com.playit.presentation.ui.components.BottomNavigation
 import com.playit.presentation.ui.components.NavigationTitle
 import com.playit.presentation.ui.screens.authentication.AuthenticationScreen
 import com.playit.presentation.ui.screens.home.HomeScreen
+import com.playit.presentation.ui.screens.library.LibraryScreen
 import com.playit.presentation.ui.screens.profile.ProfileScreen
 import com.playit.presentation.ui.screens.search.SearchScreen
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -190,8 +191,19 @@ fun App(
                     SearchScreen()
                 }
 
-                composable("profile") {
-                    ProfileScreen()
+                composable("library") {
+                    LibraryScreen(
+                        onScrollOffsetChanged = { offset ->
+                            scrollOffset = offset
+                        },
+                        navigationTitle = {
+                            NavigationTitle(
+                                title = "Home",
+                                scrollOffset = scrollOffset,
+                                maxOffset = maxOffset,
+                            )
+                        }
+                    )
                 }
             }
         }

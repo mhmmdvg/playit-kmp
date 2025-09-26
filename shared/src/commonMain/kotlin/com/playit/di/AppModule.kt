@@ -2,17 +2,15 @@ package com.playit.di
 
 import com.playit.data.cache.DataStoreFactory
 import com.playit.data.cache.NewReleasesCacheStore
-import com.playit.domain.repository.AlbumsRepository
-import com.playit.domain.repository.AuthenticationRepository
-import com.playit.domain.repository.PlaylistsRepository
-import com.playit.domain.repository.TracksRepository
+import com.playit.data.cache.PlaylistCacheStore
+import com.playit.data.cache.ProfileCacheStore
 import com.playit.data.remote.api.AlbumsApi
 import com.playit.data.remote.api.PlaylistsApi
+import com.playit.data.remote.api.ProfileApi
 import com.playit.data.remote.api.TracksApi
-import com.playit.data.remote.repository.AlbumsRepositoryImpl
-import com.playit.data.remote.repository.AuthenticationRepositoryImpl
-import com.playit.data.remote.repository.PlaylistsRepositoryImpl
-import com.playit.data.remote.repository.TracksRepositoryImpl
+import com.playit.data.remote.repository.*
+import com.playit.domain.repository.*
+import com.playit.viewmodels.CurrentMeViewModel
 import com.playit.viewmodels.CurrentPlaylistsViewModel
 import com.playit.viewmodels.NewReleasesViewModel
 import com.playit.viewmodels.TracksViewModel
@@ -26,20 +24,24 @@ val appModule = module {
     singleOf(::PlaylistsApi)
     singleOf(::AlbumsApi)
     singleOf(::TracksApi)
+    singleOf(::ProfileApi)
 
     // Cache
     single { DataStoreFactory.createDataStore() }
     singleOf(::NewReleasesCacheStore)
+    singleOf(::PlaylistCacheStore)
+    singleOf(::ProfileCacheStore)
 
 //    Repository
     singleOf(::AuthenticationRepositoryImpl).bind<AuthenticationRepository>()
     singleOf(::PlaylistsRepositoryImpl).bind<PlaylistsRepository>()
     singleOf(::AlbumsRepositoryImpl).bind<AlbumsRepository>()
     singleOf(::TracksRepositoryImpl).bind<TracksRepository>()
-
+    singleOf(::ProfileRepositoryImpl).bind<ProfileRepository>()
 
 //    View Models
     factoryOf(::CurrentPlaylistsViewModel)
     factoryOf(::NewReleasesViewModel)
     factoryOf(::TracksViewModel)
+    factoryOf(::CurrentMeViewModel)
 }

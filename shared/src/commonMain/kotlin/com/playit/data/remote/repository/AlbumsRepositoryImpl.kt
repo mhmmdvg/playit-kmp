@@ -1,10 +1,10 @@
 package com.playit.data.remote.repository
 
 import com.playit.data.cache.NewReleasesCacheStore
-import com.playit.domain.models.NewReleasesCache
+import com.playit.data.remote.api.AlbumsApi
+import com.playit.domain.models.CacheData
 import com.playit.domain.models.NewReleasesResponse
 import com.playit.domain.repository.AlbumsRepository
-import com.playit.data.remote.api.AlbumsApi
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import kotlinx.serialization.json.Json
@@ -20,7 +20,7 @@ class AlbumsRepositoryImpl(
 ) : AlbumsRepository {
     private var _cacheExpiration = 30.minutes
 
-    suspend fun getCachedData(): NewReleasesCache? = newReleasesCacheStore.loadNewReleases()
+    suspend fun getCachedData(): CacheData<NewReleasesResponse>? = newReleasesCacheStore.loadNewReleases()
 
     override suspend fun getNewReleases(): Result<NewReleasesResponse> {
         val cachedData = newReleasesCacheStore.loadNewReleases()

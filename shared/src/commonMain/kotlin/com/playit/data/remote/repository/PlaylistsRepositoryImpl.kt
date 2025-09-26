@@ -1,16 +1,34 @@
+@file:OptIn(ExperimentalTime::class)
+
 package com.playit.data.remote.repository
 
+import com.playit.data.cache.PlaylistCacheStore
+import com.playit.data.remote.api.PlaylistsApi
+import com.playit.domain.models.CacheData
 import com.playit.domain.models.CurrentPlaylistsResponse
 import com.playit.domain.repository.PlaylistsRepository
-import com.playit.data.remote.api.PlaylistsApi
-import io.ktor.client.call.body
-import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
 import kotlinx.serialization.json.Json
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 class PlaylistsRepositoryImpl(
-    private val playlistsApi: PlaylistsApi
+    private val playlistsApi: PlaylistsApi,
+    private val cacheStore: PlaylistCacheStore
 ) : PlaylistsRepository {
-   override suspend fun getCurrentPlaylists(): Result<CurrentPlaylistsResponse> {
+    private val _cacheExpiration = 30.minutes
+
+    suspend fun getCachedData(): CacheData<CurrentPlaylistsResponse>? = cacheStore.loadPlaylist()
+
+    override suspend fun getCurrentPlaylists(): Result<CurrentPlaylistsResponse> {
+        val cachedData = cacheStore.loadPlaylist()
+        if (cachedData != null && cacheIsValid(cachedData.timestamp)) {
+            return Result.success(cachedData.data)
+        }
+
         return try {
             val res = playlistsApi.getCurrentPlaylists()
             Result.success(res)
@@ -23,7 +41,11 @@ class PlaylistsRepositoryImpl(
         }
     }
 
-    override fun invalidateCache() {
-        TODO("Not yet implemented")
+    override suspend fun invalidateCache() {
+        cacheStore.clearCache()
+    }
+
+    override fun cacheIsValid(timestamp: Long): Boolean {
+        return Clock.System.now() - Instant.fromEpochSeconds(timestamp) < _cacheExpiration
     }
 }
