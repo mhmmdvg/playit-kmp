@@ -40,7 +40,7 @@ struct SongsList: View {
                     .foregroundStyle(.red)
                     .padding()
             } else if let songsData = songsData {
-                ForEach(songsData, id: \.id) { item in
+                ForEach(songsData.prefix(3), id: \.id) { item in
                     Button(action: {}) {
                         HStack(spacing: 16) {
                             SongImage(url: item.images[0].url)

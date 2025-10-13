@@ -29,15 +29,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.playit.domain.models.Item
 import com.playit.presentation.ui.components.CacheImage
 import com.playit.presentation.ui.components.shimmerEffect
 
 @Composable
-fun NewAlbumCard(
+fun GridAlbumCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
-    albumData: Item? = null,
+//    albumData: Item? = null,
+    images: String? = null,
+    name: String? = null,
+    artist: String? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -67,7 +69,7 @@ fun NewAlbumCard(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             CacheImage(
-                imageUrl = albumData?.images?.get(0)?.url ?: "",
+                imageUrl = images ?: "",
                 modifier = Modifier.fillMaxSize()
                     .shadow(
                         elevation = 6.dp,
@@ -76,14 +78,14 @@ fun NewAlbumCard(
                         spotColor = Color.Blue,
                     )
                     .clip(RoundedCornerShape(16.dp)),
-                description = albumData?.name ?: "",
+                description = name ?: "",
                 contentScale = ContentScale.FillBounds
             )
 
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                albumData?.name?.let {
+                name?.let {
                     Text(
                         text = it,
                         fontSize = 16.sp,
@@ -94,7 +96,7 @@ fun NewAlbumCard(
                     )
                 }
 
-               albumData?.artists[0]?.name?.let {
+               artist?.let {
                    Text(
                        text = it,
                        fontSize = 14.sp,
@@ -114,7 +116,7 @@ fun SkeletonNewAlbumCard(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         // Album cover skeleton

@@ -3,6 +3,7 @@ package com.playit.presentation
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.playit.constants.SpotifyConfig
@@ -14,7 +15,16 @@ class MainActivity : ComponentActivity() {
     private lateinit var chromeCustomTabsManager: ChromeCustomTabsManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(
+                lightScrim = android.graphics.Color.WHITE,
+                darkScrim = android.graphics.Color.BLACK,
+            ),
+            navigationBarStyle = SystemBarStyle.auto(
+                lightScrim = android.graphics.Color.WHITE,
+                darkScrim = android.graphics.Color.BLACK,
+            )
+        )
         super.onCreate(savedInstanceState)
 
         chromeCustomTabsManager = ChromeCustomTabsManager(this, this)

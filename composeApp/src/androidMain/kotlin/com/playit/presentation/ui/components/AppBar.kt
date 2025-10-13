@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -40,7 +41,6 @@ fun AppBar(
     maxOffset: Int = 200,
 ) {
     val collapseProgress = min(1f, max(0f, scrollOffset.toFloat() / maxOffset))
-    val borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
 
     val smallTitleAlpha by animateFloatAsState(
         targetValue = when {
@@ -59,15 +59,18 @@ fun AppBar(
         modifier = modifier
             .height(64.dp)
             .alpha(smallTitleAlpha)
-            .background(Color.White)
-            .then(if (collapseProgress > 0.8f) Modifier.drawBehind {
-                drawLine(
-                    color = borderColor,
-                    start = Offset(0f, size.height),
-                    end = Offset(size.width, size.height),
-                    strokeWidth = 1.dp.toPx()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+                        MaterialTheme.colorScheme.background.copy(alpha = 0.6f),
+                        Color.Transparent
+                    ),
+                    startY = 0f,
+                    endY = Float.POSITIVE_INFINITY
                 )
-            } else Modifier)
+            )
             .zIndex(1f),
         title = {
             Box(

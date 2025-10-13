@@ -17,7 +17,7 @@ import kotlinx.coroutines.runBlocking
 class CurrentPlaylistsViewModel(
     private val playlistsRepositoryImpl: PlaylistsRepositoryImpl
 ) : BaseViewModel() {
-    private val _currentPlaylists = MutableStateFlow<Resource<CurrentPlaylistsResponse>>(initializeWithCache())
+    private val _currentPlaylists = MutableStateFlow(initializeWithCache())
     val currentPlaylists: StateFlow<Resource<CurrentPlaylistsResponse>> = _currentPlaylists.asStateFlow()
     val currentPlaylistsFlow: CommonFlow<Resource<CurrentPlaylistsResponse>> = _currentPlaylists.asCommonFlow()
 

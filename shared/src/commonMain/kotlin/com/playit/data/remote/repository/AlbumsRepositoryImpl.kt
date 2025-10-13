@@ -28,19 +28,21 @@ class AlbumsRepositoryImpl(
             return Result.success(cachedData.data)
         }
 
-        return try {
+        return runCatching {
             val res = albumsApi.getNewReleases()
             newReleasesCacheStore.saveNewReleases(
                 data = res,
                 timestamp = Clock.System.now().epochSeconds
             )
-            Result.success(res)
-        } catch (error: ClientRequestException) {
-            val errorBody = error.response.body<String>()
-            val errorResponse = Json.decodeFromString<Any>(errorBody)
-            Result.failure(Exception(errorResponse.toString()))
-        } catch (e: Exception) {
-            Result.failure(e)
+            res
+        }.recoverCatching { error ->
+            if (error is ClientRequestException) {
+                val errorBody = error.response.body<String>()
+                val errorResponse = Json.decodeFromString<Any>(errorBody)
+                throw Exception(errorResponse.toString())
+            } else {
+                throw error
+            }
         }
     }
 

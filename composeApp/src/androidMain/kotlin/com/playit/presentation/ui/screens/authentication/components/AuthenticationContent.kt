@@ -39,14 +39,15 @@ fun AuthenticationContent(
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
-            .background(Color.White),
+            .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "Welcome Back",
             fontSize = 32.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
         )
         Text(
             text = if (isLoading) "Signing in with Spotify..." else "Login with your Spotify Account",

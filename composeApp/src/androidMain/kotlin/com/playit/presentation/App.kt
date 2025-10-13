@@ -2,6 +2,7 @@ package com.playit.presentation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +27,8 @@ import com.playit.presentation.ui.screens.home.HomeScreen
 import com.playit.presentation.ui.screens.library.LibraryScreen
 import com.playit.presentation.ui.screens.profile.ProfileScreen
 import com.playit.presentation.ui.screens.search.SearchScreen
+import com.playit.presentation.ui.theme.DarkColorScheme
+import com.playit.presentation.ui.theme.LightColorScheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import kotlin.math.max
@@ -35,6 +38,7 @@ import kotlin.math.min
 @Composable
 @Preview
 fun App(
+    darkTheme: Boolean = isSystemInDarkTheme(),
     onLaunchOAuth: (String) -> Unit,
     onSetTabCloseListener: (() -> Unit) -> Unit
 ) {
@@ -49,7 +53,6 @@ fun App(
     val currentRoute = navBackStackEntry?.destination?.route
     val maxOffset = 200
     val collapseProgress = min(1f, max(0f, scrollOffset.toFloat() / maxOffset))
-    val topPadding = (16 - (6 * collapseProgress)).dp
 
 
     LaunchedEffect(isAuthenticated) {
@@ -72,11 +75,14 @@ fun App(
         else -> !currentRoute.startsWith(Screen.HomeScreen.route + "/")
     }
 
-    MaterialTheme {
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+
+    MaterialTheme(
+        colorScheme = colorScheme
+    ) {
         Scaffold(
             modifier = Modifier
-                .fillMaxSize()
-                .then(if (currentRoute == Screen.HomeScreen.route) Modifier.padding(top = topPadding) else Modifier),
+                .fillMaxSize(),
             topBar = {
                 when (currentRoute) {
                     Screen.HomeScreen.route -> {
@@ -84,6 +90,21 @@ fun App(
                             title = "Home",
                             scrollOffset = scrollOffset,
                             maxOffset = maxOffset,
+                        )
+                    }
+                    Screen.LibraryScreen.route -> {
+                        AppBar(
+                            title = "Library",
+                            scrollOffset = scrollOffset,
+                            maxOffset = maxOffset,
+                        )
+                    }
+                    Screen.ProfileScreen.route -> {
+                        AppBar(
+                            title = "",
+                            scrollOffset = 200,
+                            maxOffset = maxOffset,
+                            onBackPressed = { navController.popBackStack() }
                         )
                     }
                 }
@@ -126,7 +147,7 @@ fun App(
                             ) + fadeIn(animationSpec = tween(400))
                         }
 
-                        targetState.destination.route == Screen.HomeScreen.route || targetState.destination.route == Screen.SearchScreen.route || targetState.destination.route == Screen.ProfileScreen.route -> fadeIn(
+                        targetState.destination.route == Screen.HomeScreen.route || targetState.destination.route == Screen.SearchScreen.route || targetState.destination.route == Screen.LibraryScreen.route -> fadeIn(
                             animationSpec = tween(300)
                         )
 
@@ -154,7 +175,7 @@ fun App(
                             ) + fadeOut(animationSpec = tween(400))
                         }
 
-                        targetState.destination.route == Screen.HomeScreen.route || targetState.destination.route == Screen.SearchScreen.route || targetState.destination.route == Screen.ProfileScreen.route -> fadeOut(
+                        targetState.destination.route == Screen.HomeScreen.route || targetState.destination.route == Screen.SearchScreen.route || targetState.destination.route == Screen.LibraryScreen.route -> fadeOut(
                             animationSpec = tween(300)
                         )
 
@@ -163,6 +184,20 @@ fun App(
                             animationSpec = tween(350)
                         )
                     }
+                },
+                popEnterTransition = {
+                    // Reverse of exitTransition - slide in from left
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(350)
+                    )
+                },
+                popExitTransition = {
+                    // Reverse of enterTransition - slide out to right
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(350)
+                    )
                 }
             ) {
                 composable("authentication") {
@@ -180,6 +215,7 @@ fun App(
                         navigationTitle = {
                             NavigationTitle(
                                 title = "Home",
+                                navController = navController,
                                 scrollOffset = scrollOffset,
                                 maxOffset = maxOffset,
                             )
@@ -198,12 +234,17 @@ fun App(
                         },
                         navigationTitle = {
                             NavigationTitle(
-                                title = "Home",
+                                title = "Library",
+                                navController = navController,
                                 scrollOffset = scrollOffset,
                                 maxOffset = maxOffset,
                             )
                         }
                     )
+                }
+
+                composable("profile") {
+                    ProfileScreen()
                 }
             }
         }
