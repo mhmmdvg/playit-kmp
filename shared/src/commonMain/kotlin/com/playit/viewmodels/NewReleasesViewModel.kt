@@ -5,6 +5,8 @@ import com.playit.data.remote.repository.AlbumsRepositoryImpl
 import com.playit.data.remote.resources.Resource
 import com.playit.utils.CommonFlow
 import com.playit.utils.asCommonFlow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,7 +31,7 @@ class NewReleasesViewModel(
 
     private fun initializeWithCache(): Resource<NewReleasesResponse> {
         return try {
-            val cachedData = runBlocking { albumsRepositoryImpl.getCachedData() }
+            val cachedData = runBlocking(Dispatchers.IO) { albumsRepositoryImpl.getCachedData() }
             if (cachedData != null && albumsRepositoryImpl.cacheIsValid(cachedData.timestamp)) {
                 Resource.Success(cachedData.data)
             } else {
@@ -40,6 +42,7 @@ class NewReleasesViewModel(
             Resource.Loading()
         }
     }
+
     fun getNewReleases() {
         viewModelScope.launch {
             if (_newReleases.value !is Resource.Success) {

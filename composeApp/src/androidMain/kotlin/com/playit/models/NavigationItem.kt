@@ -1,10 +1,10 @@
 package com.playit.models
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.composables.icons.lucide.Library
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Music
 import com.composables.icons.lucide.Search
-import com.composables.icons.lucide.User
 import com.playit.presentation.Screen
 
 data class NavigationItem(
@@ -25,8 +25,8 @@ val navigationItems = listOf(
         screen = Screen.SearchScreen.route
     ),
     NavigationItem(
-        title = "Profile",
-        icon = Lucide.User,
-        screen = Screen.ProfileScreen.route
+        title = "Library",
+        icon = Lucide.Library,
+        screen = Screen.LibraryScreen.route
     )
 )

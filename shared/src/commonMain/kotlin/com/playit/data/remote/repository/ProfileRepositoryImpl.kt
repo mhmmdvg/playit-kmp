@@ -1,36 +1,37 @@
+@file:OptIn(ExperimentalTime::class)
+
 package com.playit.data.remote.repository
 
-import com.playit.data.cache.NewReleasesCacheStore
-import com.playit.data.remote.api.AlbumsApi
+import com.playit.data.cache.ProfileCacheStore
+import com.playit.data.remote.api.ProfileApi
 import com.playit.domain.models.CacheData
-import com.playit.domain.models.NewReleasesResponse
-import com.playit.domain.repository.AlbumsRepository
-import io.ktor.client.call.*
-import io.ktor.client.plugins.*
+import com.playit.domain.models.ProfileResponse
+import com.playit.domain.repository.ProfileRepository
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
 import kotlinx.serialization.json.Json
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-@OptIn(ExperimentalTime::class)
-class AlbumsRepositoryImpl(
-    private val albumsApi: AlbumsApi,
-    private val newReleasesCacheStore: NewReleasesCacheStore
-) : AlbumsRepository {
-    private var _cacheExpiration = 30.minutes
+class ProfileRepositoryImpl(
+    private val profileApi: ProfileApi,
+    private val profileCacheStore: ProfileCacheStore
+) : ProfileRepository {
+    private val _cacheExpiration = 60.minutes
 
-    suspend fun getCachedData(): CacheData<NewReleasesResponse>? = newReleasesCacheStore.loadNewReleases()
+    suspend fun getCachedData(): CacheData<ProfileResponse>? = profileCacheStore.loadProfile()
 
-    override suspend fun getNewReleases(): Result<NewReleasesResponse> {
-        val cachedData = newReleasesCacheStore.loadNewReleases()
+    override suspend fun getCurrentProfile(): Result<ProfileResponse> {
+        val cachedData = profileCacheStore.loadProfile()
         if (cachedData != null && cacheIsValid(cachedData.timestamp)) {
             return Result.success(cachedData.data)
         }
 
         return runCatching {
-            val res = albumsApi.getNewReleases()
-            newReleasesCacheStore.saveNewReleases(
+            val res = profileApi.getCurrentProfile()
+            profileCacheStore.saveProfile(
                 data = res,
                 timestamp = Clock.System.now().epochSeconds
             )
@@ -47,7 +48,7 @@ class AlbumsRepositoryImpl(
     }
 
     override suspend fun invalidateCache() {
-        newReleasesCacheStore.clearCache()
+        profileCacheStore.clearCache()
     }
 
     override fun cacheIsValid(timestamp: Long): Boolean {

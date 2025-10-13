@@ -11,15 +11,16 @@ class TracksRepositoryImpl(
     private val tracksApi: TracksApi
 ) : TracksRepository {
     override suspend fun getSeveralTracks(): Result<SeveralTracks> {
-        return try {
-            val res = tracksApi.getSeveralTracks()
-            Result.success(res)
-        } catch(error: ClientRequestException) {
-            val errorBody = error.response.body<String>()
-            val errorResponse = Json.decodeFromString<Any>(errorBody)
-            Result.failure(Exception(errorResponse.toString()))
-        } catch (e: Exception) {
-            Result.failure(e)
+        return runCatching {
+            tracksApi.getSeveralTracks()
+        }.recoverCatching { error ->
+            if (error is ClientRequestException) {
+                val errorBody = error.response.body<String>()
+                val errorResponse = Json.decodeFromString<Any>(errorBody)
+                throw Exception(errorResponse.toString())
+            } else {
+                throw error
+            }
         }
     }
 

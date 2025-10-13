@@ -3,6 +3,7 @@ package com.playit.di
 import com.playit.data.remote.repository.AlbumsRepositoryImpl
 import com.playit.data.remote.repository.AuthenticationRepositoryImpl
 import com.playit.data.remote.repository.PlaylistsRepositoryImpl
+import com.playit.data.remote.repository.ProfileRepositoryImpl
 import com.playit.data.remote.repository.TracksRepositoryImpl
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -12,11 +13,13 @@ class KoinHelper : KoinComponent {
     private val authenticationRepositoryImpl: AuthenticationRepositoryImpl by inject()
     private val albumsRepositoryImpl: AlbumsRepositoryImpl by inject()
     private val tracksRepositoryImpl: TracksRepositoryImpl by inject()
+    private val profileRepositoryImpl: ProfileRepositoryImpl by inject()
 
     fun providePlaylistsRepository(): PlaylistsRepositoryImpl = playlistsRepositoryImpl
     fun provideAuthenticationRepository(): AuthenticationRepositoryImpl = authenticationRepositoryImpl
     fun provideAlbumsRepository(): AlbumsRepositoryImpl = albumsRepositoryImpl
     fun provideTracksRepository(): TracksRepositoryImpl = tracksRepositoryImpl
+    fun provideProfileRepository(): ProfileRepositoryImpl = profileRepositoryImpl
 
     companion object {
         val shared = KoinHelper()

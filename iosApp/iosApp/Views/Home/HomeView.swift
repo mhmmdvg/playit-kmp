@@ -13,20 +13,27 @@ struct HomeView: View {
     
     @StateObject private var newReleasesVm: NewReleasesViewModelWrapper
     @State private var search = ""
+    @State private var lastScrollOffset: CGFloat = 0
     
     init(albumsRepository: AlbumsRepositoryImpl) {
         self._newReleasesVm = StateObject(wrappedValue: NewReleasesViewModelWrapper(albumsRepository: albumsRepository))
     }
     
     var body: some View {
-        NavigationView {
+        ZStack(alignment: .top) {
+            CustomNavigationView(title: "Home", profileRepository: KoinHelper.companion.shared.provideProfileRepository())
+                .opacity(lastScrollOffset > -50 ? 0 : 1)
+                .animation(.easeInOut(duration: 0.3), value: lastScrollOffset)
+            
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     Button(action: {
                         authViewModel.logout()
                     }) {
-                        AlbumOverview(url: "https://i.scdn.co/image/ab67616d00001e02bc1028b7e9cd2b17c770a520")
-                            .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+                        AlbumOverview(
+                            url: "https://i.scdn.co/image/ab67616d00001e02bc1028b7e9cd2b17c770a520"
+                        )
+                        .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
                     }
                     
                     NewAlbums(
@@ -41,13 +48,21 @@ struct HomeView: View {
                         songsData: newReleasesVm.newReleasesData?.albums.items
                     )
                 }
-                .padding()
+                .padding(.horizontal)
+                .padding(.top, 75)
+            }
+            .onScrollGeometryChange(for: Double.self) { geo in
+                geo.contentOffset.y
+            } action: { oldValue, newValue in
+                if oldValue != newValue {
+                    lastScrollOffset = newValue
+                }
             }
             .onAppear {
                 newReleasesVm.getNewReleases()
             }
-            .navigationTitle("Music")
-            .searchable(text: $search, prompt: "Search songs, artits, albums")
+            
+            GradientAppBar()
         }
     }
 }

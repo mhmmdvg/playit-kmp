@@ -8,7 +8,6 @@ import io.ktor.client.request.get
 class PlaylistsApi(
     private val client: HttpClient
 ) {
-
     suspend fun getCurrentPlaylists(): CurrentPlaylistsResponse {
         return client.get("me/playlists").body()
     }
