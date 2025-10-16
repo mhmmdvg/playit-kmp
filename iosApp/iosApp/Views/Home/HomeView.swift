@@ -21,10 +21,6 @@ struct HomeView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            CustomNavigationView(title: "Home", profileRepository: KoinHelper.companion.shared.provideProfileRepository())
-                .opacity(lastScrollOffset > -50 ? 0 : 1)
-                .animation(.easeInOut(duration: 0.3), value: lastScrollOffset)
-            
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     Button(action: {
@@ -63,6 +59,10 @@ struct HomeView: View {
             }
             
             GradientAppBar()
+            
+            CustomNavigationView(title: "Home")
+                .opacity(lastScrollOffset > -50 ? 0 : 1)
+                .animation(.easeInOut(duration: 0.3), value: lastScrollOffset)
         }
     }
 }

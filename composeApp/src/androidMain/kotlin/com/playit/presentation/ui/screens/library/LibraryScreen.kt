@@ -137,66 +137,6 @@ fun LibraryScreen(
                     }
                 }
             )
-
-//            when (currentPaylist) {
-//                is Resource.Loading -> {
-//                    items(8) {
-//                        SkeletonPlaylistCard(
-//                            modifier = Modifier.fillMaxWidth(),
-//                        )
-//                    }
-//                }
-//                is Resource.Success -> {
-//                    val playlists = currentPaylist.data?.items ?: emptyList()
-//
-//                    if (playlists.isEmpty()) {
-//                        item {
-//                            EmptyPlaylistState(
-//                                onAddPlaylist = onAddPlaylist,
-//                                modifier = Modifier
-//                                    .fillMaxWidth()
-//                                    .padding(vertical = 60.dp)
-//                            )
-//                        }
-//                    } else {
-//                        items(
-//                            items = playlists,
-//                            key = { it.id }
-//                        ) {
-//                            PlaylistCard(
-//                                data = it,
-//                            ) {
-//                                Log.d("LibraryScreen", it.id)
-//                            }
-//                        }
-//                    }
-//                }
-//                is Resource.Error -> {
-//                    item {
-//                        Column(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .padding(vertical = 60.dp),
-//                            horizontalAlignment = Alignment.CenterHorizontally,
-//                            verticalArrangement = Arrangement.Center
-//                        ) {
-//                            Text(
-//                                text = "Error loading playlists",
-//                                color = Color.Red,
-//                                fontWeight = FontWeight.Bold,
-//                                fontSize = 18.sp
-//                            )
-//                            Spacer(modifier = Modifier.height(8.dp))
-//                            Text(
-//                                text = currentPaylist.message ?: "Unknown error occurred",
-//                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-//                                fontSize = 14.sp,
-//                                textAlign = TextAlign.Center
-//                            )
-//                        }
-//                    }
-//                }
-//            }
         }
     }
 }

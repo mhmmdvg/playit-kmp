@@ -11,13 +11,13 @@ import Shared
 enum TabItem: String, CaseIterable {
     case home = "Home"
     case search = "Search"
-    case profile = "Profile"
+    case library = "Library"
     
     var systemImage: String {
         switch self {
         case .home: return "house.fill"
         case .search: return "magnifyingglass"
-        case .profile: return "person.fill"
+        case .library: return "rectangle.stack"
         }
     }
     
@@ -28,8 +28,8 @@ enum TabItem: String, CaseIterable {
             HomeView(albumsRepository: KoinHelper.companion.shared.provideAlbumsRepository())
         case .search:
             SearchView()
-        case .profile:
-            ProfileView()
+        case .library:
+            LibraryView(currentPlaylistRepository: KoinHelper.companion.shared.providePlaylistsRepository())
         }
     }
 }
