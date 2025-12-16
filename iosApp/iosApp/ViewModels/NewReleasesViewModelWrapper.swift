@@ -52,7 +52,7 @@ class NewReleasesViewModelWrapper: ObservableObject {
     }
     
     func getNewReleases() {
-        viewModel.getNewReleases()
+        viewModel.loadNewReleases(forceRefresh: false)
     }
     
     private func updateUIState(from resource: Resource<NewReleasesResponse>) {

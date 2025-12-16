@@ -1,5 +1,6 @@
 package com.playit.viewmodels
 
+import androidx.lifecycle.ViewModel
 import com.playit.domain.models.SeveralTracks
 import com.playit.data.remote.repository.TracksRepositoryImpl
 import com.playit.data.remote.resources.Resource
@@ -14,7 +15,7 @@ import kotlinx.coroutines.launch
 
 class TracksViewModel(
     private val tracksRepositoryImpl: TracksRepositoryImpl
-) {
+) : ViewModel() {
     private val viewModelScope = CoroutineScope(Dispatchers.Main)
 
     private val _severalTracks = MutableStateFlow<Resource<SeveralTracks>>(Resource.Success(null))

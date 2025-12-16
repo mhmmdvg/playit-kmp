@@ -1,66 +1,74 @@
 package com.playit.viewmodels
 
-import com.playit.domain.models.NewReleasesResponse
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.playit.data.remote.repository.AlbumsRepositoryImpl
 import com.playit.data.remote.resources.Resource
+import com.playit.domain.models.NewReleasesResponse
 import com.playit.utils.CommonFlow
 import com.playit.utils.asCommonFlow
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class NewReleasesViewModel(
     private val albumsRepositoryImpl: AlbumsRepositoryImpl
-) : BaseViewModel() {
-    private val _newReleases = MutableStateFlow(initializeWithCache())
+) : ViewModel() {
+    private val _newReleases = MutableStateFlow<Resource<NewReleasesResponse>>(Resource.Success(null))
     val newReleases: StateFlow<Resource<NewReleasesResponse>> = _newReleases.asStateFlow()
-
     val newReleasesFlow: CommonFlow<Resource<NewReleasesResponse>> = _newReleases.asCommonFlow()
+    var fetchJob: Job? = null
 
     init {
-        if (_newReleases.value is Resource.Loading) {
-            getNewReleases()
-        }
+        loadNewReleases()
     }
 
-    private fun initializeWithCache(): Resource<NewReleasesResponse> {
-        return try {
-            val cachedData = runBlocking(Dispatchers.IO) { albumsRepositoryImpl.getCachedData() }
-            if (cachedData != null && albumsRepositoryImpl.cacheIsValid(cachedData.timestamp)) {
-                Resource.Success(cachedData.data)
-            } else {
-                Resource.Loading()
-            }
-        } catch (error: Exception) {
-            println("Cache loading failed during initialization: ${error.message}")
-            Resource.Loading()
-        }
-    }
-
-    fun getNewReleases() {
-        viewModelScope.launch {
-            if (_newReleases.value !is Resource.Success) {
-                _newReleases.value = Resource.Loading()
+    fun loadNewReleases(forceRefresh: Boolean = false) {
+        fetchJob?.cancel()
+        fetchJob = viewModelScope.launch {
+            if (forceRefresh) {
+                albumsRepositoryImpl.invalidateCache()
             }
 
-            try {
-                albumsRepositoryImpl.getNewReleases().fold(
-                    onSuccess = { success ->
-                        _newReleases.value = Resource.Success(success)
-                    },
-                    onFailure = { error ->
-                        _newReleases.value = Resource.Error(error.message ?: "Something went wrong")
+            albumsRepositoryImpl.getNewReleases()
+                .onStart {
+                    if (_newReleases.value.data == null) {
+                        _newReleases.value = Resource.Loading()
                     }
-                )
-            } catch (error: Exception) {
-                _newReleases.value = Resource.Error(error.message ?: "Something went wrong")
-            }
+                }
+                .catch { exception ->
+                    _newReleases.value =
+                        Resource.Error(
+                            message = exception.message ?: "Something went wrong",
+                            data = _newReleases.value.data
+                        )
+                }
+                .collect { result ->
+                    result.fold(
+                        onSuccess = { response ->
+                            _newReleases.value = Resource.Success(response)
+                        },
+                        onFailure = { exception ->
+                            _newReleases.value =
+                                Resource.Error(
+                                    message = exception.message ?: "Something went wrong",
+                                    data = _newReleases.value.data
+                                )
+                        }
+                    )
+                }
         }
+    }
+
+    fun retry() {
+        loadNewReleases(forceRefresh = true)
+    }
+
+
+    override fun onCleared() {
+        super.onCleared()
+        fetchJob?.cancel()
     }
 }

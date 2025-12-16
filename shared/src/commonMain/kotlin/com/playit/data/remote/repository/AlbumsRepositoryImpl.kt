@@ -1,56 +1,108 @@
 package com.playit.data.remote.repository
 
-import com.playit.data.cache.NewReleasesCacheStore
 import com.playit.data.remote.api.AlbumsApi
-import com.playit.domain.models.CacheData
+import com.playit.data.remote.local.dao.AlbumsDao
+import com.playit.data.remote.local.mappers.toAlbumArtistCrossRefs
+import com.playit.data.remote.local.mappers.toAlbumEntity
+import com.playit.data.remote.local.mappers.toAlbumImageEntities
+import com.playit.data.remote.local.mappers.toAlbumMarketEntities
+import com.playit.data.remote.local.mappers.toArtistEntity
+import com.playit.data.remote.local.mappers.toDomain
+import com.playit.domain.models.Albums
+import com.playit.domain.models.Item
 import com.playit.domain.models.NewReleasesResponse
 import com.playit.domain.repository.AlbumsRepository
-import io.ktor.client.call.*
-import io.ktor.client.plugins.*
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 class AlbumsRepositoryImpl(
     private val albumsApi: AlbumsApi,
-    private val newReleasesCacheStore: NewReleasesCacheStore
+    private val albumsDao: AlbumsDao
 ) : AlbumsRepository {
-    private var _cacheExpiration = 30.minutes
+    private var _cacheValidityDuration = 30.minutes
 
-    suspend fun getCachedData(): CacheData<NewReleasesResponse>? = newReleasesCacheStore.loadNewReleases()
+    override suspend fun getNewReleases(): Flow<Result<NewReleasesResponse>> = flow {
+        val cachedAlbums = albumsDao.getAlbumsWithDetails().first()
+        val isCachedValid = cachedAlbums.isNotEmpty() && (Clock.System.now()
+            .toEpochMilliseconds() - cachedAlbums.first().album.createdAt) < _cacheValidityDuration.inWholeMilliseconds
 
-    override suspend fun getNewReleases(): Result<NewReleasesResponse> {
-        val cachedData = newReleasesCacheStore.loadNewReleases()
-        if (cachedData != null && cacheIsValid(cachedData.timestamp)) {
-            return Result.success(cachedData.data)
-        }
-
-        return runCatching {
-            val res = albumsApi.getNewReleases()
-            newReleasesCacheStore.saveNewReleases(
-                data = res,
-                timestamp = Clock.System.now().epochSeconds
+        if (isCachedValid) {
+            println("Using cached new releases data")
+            val domainAlbums = cachedAlbums.map { it.toDomain() }
+            val cachedResponse = NewReleasesResponse(
+                albums = Albums(
+                    href = cachedAlbums.firstOrNull()?.album?.href ?: "",
+                    items = domainAlbums,
+                    limit = domainAlbums.size,
+                    next = null,
+                    offset = 0,
+                    previous = null,
+                    total = domainAlbums.size
+                )
             )
-            res
-        }.recoverCatching { error ->
-            if (error is ClientRequestException) {
-                val errorBody = error.response.body<String>()
-                val errorResponse = Json.decodeFromString<Any>(errorBody)
-                throw Exception(errorResponse.toString())
-            } else {
-                throw error
+            emit(Result.success(cachedResponse))
+        } else {
+            try {
+                println("Fetching new releases data")
+                val response = albumsApi.getNewReleases()
+
+                cacheAlbums(response.albums.items)
+                emit(Result.success(response))
+            } catch (error: Exception) {
+                if (cachedAlbums.isNotEmpty()) {
+                    val domainAlbums = cachedAlbums.map { it.toDomain() }
+                    val staleResponse = NewReleasesResponse(
+                        albums = Albums(
+                            href = cachedAlbums.firstOrNull()?.album?.href ?: "",
+                            items = domainAlbums,
+                            limit = domainAlbums.size,
+                            next = null,
+                            offset = 0,
+                            previous = null,
+                            total = domainAlbums.size
+                        )
+                    )
+                    emit(Result.success(staleResponse))
+                } else {
+                    emit(Result.failure(error))
+                }
+            }
+        }
+    }
+
+    private suspend fun cacheAlbums(items: List<Item>) {
+        items.forEach { it ->
+            albumsDao.insertAlbum(it.toAlbumEntity())
+
+            val artists = it.artists.map { it.toArtistEntity()}
+            if (artists.isNotEmpty()) {
+                albumsDao.insertArtists(artists)
+            }
+
+            val crossRefs = it.toAlbumArtistCrossRefs()
+            if (crossRefs.isNotEmpty()) {
+                albumsDao.insertAlbumArtistCrossRefs(crossRefs)
+            }
+
+            val images = it.toAlbumImageEntities()
+            if (images.isNotEmpty()) {
+                albumsDao.insertAlbumImages(images)
+            }
+
+            val markets = it.toAlbumMarketEntities()
+            if (markets.isNotEmpty()) {
+                albumsDao.insertAlbumMarkets(markets)
             }
         }
     }
 
     override suspend fun invalidateCache() {
-        newReleasesCacheStore.clearCache()
-    }
-
-    override fun cacheIsValid(timestamp: Long): Boolean {
-        return Clock.System.now() - Instant.fromEpochSeconds(timestamp) < _cacheExpiration
+        albumsDao.clearAllAlbums()
+        albumsDao.deleteOrphanedArtists()
     }
 }

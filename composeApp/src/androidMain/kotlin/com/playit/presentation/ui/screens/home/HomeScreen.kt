@@ -26,14 +26,15 @@ import com.playit.presentation.ui.screens.home.components.SongCard
 import com.playit.viewmodels.CurrentPlaylistsViewModel
 import com.playit.viewmodels.NewReleasesViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun HomeScreen(
-    newReleaseVm: NewReleasesViewModel = koinInject(),
-    currentPlaylistVm: CurrentPlaylistsViewModel = koinInject(),
+    newReleaseVm: NewReleasesViewModel = koinViewModel(),
+    currentPlaylistVm: CurrentPlaylistsViewModel = koinViewModel(),
     onScrollOffsetChanged: (Int) -> Unit = {},
     navigationTitle: @Composable () -> Unit = {},
 ) {
@@ -45,11 +46,6 @@ fun HomeScreen(
     val screenWidth = with(density) { windowInfo.containerSize.width.toDp() }
     val cardWidth = (screenWidth - 40.dp - 44.dp) / 3
 
-    DisposableEffect(Unit) {
-        onDispose {
-            newReleaseVm.onCleared()
-        }
-    }
 
     LaunchedEffect(scrollState.value) {
             onScrollOffsetChanged(scrollState.value)

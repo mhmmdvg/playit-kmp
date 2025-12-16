@@ -35,7 +35,7 @@ class CurrentPlaylistsViewModelWrapper: ObservableObject {
     }
     
     func getCurrentPlaylists() {
-        viewModel.getCurrentPlaylists()
+        viewModel.loadCurrentPlaylists(forceRefresh: false)
     }
     
     private func startObserving() {
