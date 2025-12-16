@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
 }
 
 kotlin {
@@ -28,12 +30,19 @@ kotlin {
     
     sourceSets {
         commonMain.dependencies {
+            implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:2.8.4")
+
+            // Room
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
+
             // Data Store
             implementation(libs.androidx.datastore.core)
             implementation(libs.androidx.datastore.preferences.core)
 
             // Koin Core
             implementation(libs.koin.core)
+            implementation("io.insert-koin:koin-core-viewmodel:4.1.0")
 
             // Ktor Client Core
             implementation(libs.ktor.client.core)
@@ -52,6 +61,10 @@ kotlin {
             implementation(libs.kotlin.test)
         }
         androidMain.dependencies {
+            // Room
+            implementation(libs.androidx.room.sqlite.wrapper)
+
+            // Data Store
             implementation(libs.androidx.datastore.preferences)
 
             // Koin for Android
@@ -62,11 +75,15 @@ kotlin {
             implementation(libs.ktor.client.cio)
         }
         iosMain.dependencies {
+            // Data Store
             implementation(libs.androidx.datastore.preferences)
+
+            //
             implementation(libs.ktor.client.darwin)
         }
     }
 }
+
 
 android {
     namespace = "com.playit.shared"
@@ -78,4 +95,16 @@ android {
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+dependencies {
+    add("kspCommonMainMetadata", libs.androidx.room.compiler)
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosX64", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
 }

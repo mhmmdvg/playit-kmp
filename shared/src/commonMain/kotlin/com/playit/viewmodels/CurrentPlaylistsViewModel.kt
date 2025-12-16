@@ -1,65 +1,72 @@
 package com.playit.viewmodels
 
-import com.playit.domain.models.CurrentPlaylistsResponse
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.playit.data.remote.repository.PlaylistsRepositoryImpl
 import com.playit.data.remote.resources.Resource
+import com.playit.domain.models.CurrentPlaylistsResponse
 import com.playit.utils.CommonFlow
 import com.playit.utils.asCommonFlow
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class CurrentPlaylistsViewModel(
     private val playlistsRepositoryImpl: PlaylistsRepositoryImpl
-) : BaseViewModel() {
-    private val _currentPlaylists = MutableStateFlow(initializeWithCache())
+) : ViewModel() {
+    private val _currentPlaylists = MutableStateFlow<Resource<CurrentPlaylistsResponse>>(Resource.Success(null))
     val currentPlaylists: StateFlow<Resource<CurrentPlaylistsResponse>> = _currentPlaylists.asStateFlow()
     val currentPlaylistsFlow: CommonFlow<Resource<CurrentPlaylistsResponse>> = _currentPlaylists.asCommonFlow()
 
+    var fetchJob: Job? = null
+
     init {
-        if (_currentPlaylists.value is Resource.Loading) {
-            getCurrentPlaylists()
-        }
+        loadCurrentPlaylists()
     }
 
-    private fun initializeWithCache(): Resource<CurrentPlaylistsResponse> {
-        return try {
-            val cachedData = runBlocking(Dispatchers.IO) { playlistsRepositoryImpl.getCachedData() }
-            if (cachedData != null && playlistsRepositoryImpl.cacheIsValid(cachedData.timestamp)) {
-                Resource.Success(cachedData.data)
-            } else {
-                Resource.Loading()
-            }
-        } catch (error: Exception) {
-            println("Cache loading failed during initialization: ${error.message}")
-            Resource.Loading()
-        }
-    }
-
-    fun getCurrentPlaylists() {
-        viewModelScope.launch {
-            if (_currentPlaylists.value !is Resource.Success) {
-                _currentPlaylists.value = Resource.Loading()
+    fun loadCurrentPlaylists(forceRefresh: Boolean = false) {
+        fetchJob?.cancel()
+        fetchJob = viewModelScope.launch {
+            if (forceRefresh) {
+                playlistsRepositoryImpl.invalidateCache()
             }
 
-            try {
-                playlistsRepositoryImpl.getCurrentPlaylists().fold(
-                    onSuccess = {
-                        _currentPlaylists.value = Resource.Success(it)
-                    },
-                    onFailure = {
-                        _currentPlaylists.value = Resource.Error(it.message ?: "Something went wrong")
+            playlistsRepositoryImpl.getCurrentPlaylists()
+                .onStart {
+                    if (_currentPlaylists.value.data == null) {
+                        _currentPlaylists.value = Resource.Loading()
                     }
-                )
-            } catch (e: Exception) {
-                _currentPlaylists.value = Resource.Error(e.message ?: "Something went wrong")
-            }
+                }
+                .catch { exception ->
+                    _currentPlaylists.value =
+                        Resource.Error(
+                            message = exception.message ?: "Something went wrong",
+                            data = _currentPlaylists.value.data
+                        )
+                }
+                .collect { result ->
+                    result.fold(
+                        onSuccess = { response ->
+                            _currentPlaylists.value = Resource.Success(response)
+                        },
+                        onFailure = { exception ->
+                            _currentPlaylists.value =
+                                Resource.Error(
+                                    message = exception.message ?: "Something went wrong",
+                                    data = _currentPlaylists.value.data
+                                )
+                        }
+                    )
+                }
         }
     }
 
+    fun retry() {
+        loadCurrentPlaylists(forceRefresh = true)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        fetchJob?.cancel()
+    }
 }

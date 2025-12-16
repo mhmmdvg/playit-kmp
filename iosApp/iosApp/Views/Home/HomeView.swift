@@ -61,7 +61,7 @@ struct HomeView: View {
             GradientAppBar()
             
             CustomNavigationView(title: "Home")
-                .opacity(lastScrollOffset > -50 ? 0 : 1)
+                .opacity(lastScrollOffset > -30 ? 0 : 1)
                 .animation(.easeInOut(duration: 0.3), value: lastScrollOffset)
         }
     }

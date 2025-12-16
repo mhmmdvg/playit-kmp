@@ -6,4 +6,5 @@ fun sharedModules(): List<Module> = listOf(
     networkModule,
     localModule(),
     appModule,
+    databaseModule()
 )

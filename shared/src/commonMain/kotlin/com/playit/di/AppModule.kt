@@ -16,6 +16,7 @@ import com.playit.viewmodels.NewReleasesViewModel
 import com.playit.viewmodels.TracksViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
@@ -40,8 +41,8 @@ val appModule = module {
     singleOf(::ProfileRepositoryImpl).bind<ProfileRepository>()
 
 //    View Models
-    factoryOf(::CurrentPlaylistsViewModel)
-    factoryOf(::NewReleasesViewModel)
-    factoryOf(::TracksViewModel)
-    factoryOf(::CurrentMeViewModel)
+    viewModelOf(::CurrentPlaylistsViewModel)
+    viewModelOf(::NewReleasesViewModel)
+    viewModelOf(::TracksViewModel)
+    viewModelOf(::CurrentMeViewModel)
 }

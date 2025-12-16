@@ -1,5 +1,7 @@
 package com.playit.viewmodels
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.playit.data.remote.repository.ProfileRepositoryImpl
 import com.playit.data.remote.resources.Resource
 import com.playit.domain.models.ProfileResponse
@@ -15,7 +17,7 @@ import kotlinx.coroutines.runBlocking
 
 class CurrentMeViewModel(
     private val profileRepositoryImpl: ProfileRepositoryImpl,
-) : BaseViewModel() {
+) : ViewModel() {
     private val _currentMe = MutableStateFlow(initializeWithCache())
     val currentMe: StateFlow<Resource<ProfileResponse>> = _currentMe.asStateFlow()
     val currentMeFlow: CommonFlow<Resource<ProfileResponse>> = _currentMe.asCommonFlow()
