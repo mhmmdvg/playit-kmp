@@ -40,14 +40,14 @@ fun Owner.toOwnerEntity(): OwnerEntity {
 }
 
 fun PlaylistItems.toPlaylistImageEntities(): List<PlaylistImageEntity> {
-    return images.map { image ->
+    return images?.map { image ->
         PlaylistImageEntity(
             playlistId = id,
             url = image.url,
             height = image.height,
             width = image.width
         )
-    }
+    } ?: emptyList()
 }
 
 /* Entity to Domain Model Mappers */

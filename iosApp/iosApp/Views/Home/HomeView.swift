@@ -10,12 +10,14 @@ import Shared
 
 struct HomeView: View {
     @EnvironmentObject private var authViewModel: AuthenticationViewModel
-    
+    @StateObject private var currentPlaylistsVm: CurrentPlaylistsViewModelWrapper
     @StateObject private var newReleasesVm: NewReleasesViewModelWrapper
+    
     @State private var search = ""
     @State private var lastScrollOffset: CGFloat = 0
     
-    init(albumsRepository: AlbumsRepositoryImpl) {
+    init(albumsRepository: AlbumsRepositoryImpl, currentPlaylistsRepository: PlaylistsRepositoryImpl) {
+        self._currentPlaylistsVm = StateObject(wrappedValue: CurrentPlaylistsViewModelWrapper(playlistsRepository: currentPlaylistsRepository))
         self._newReleasesVm = StateObject(wrappedValue: NewReleasesViewModelWrapper(albumsRepository: albumsRepository))
     }
     
@@ -23,14 +25,7 @@ struct HomeView: View {
         ZStack(alignment: .top) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Button(action: {
-                        authViewModel.logout()
-                    }) {
-                        AlbumOverview(
-                            url: "https://i.scdn.co/image/ab67616d00001e02bc1028b7e9cd2b17c770a520"
-                        )
-                        .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
-                    }
+                    CurrentPlaylists(isLoading: currentPlaylistsVm.isLoading, errorMessage: currentPlaylistsVm.errorMessage ?? "", currentPlaylistsData: currentPlaylistsVm.currentPlaylistsData?.items)
                     
                     NewAlbums(
                         isLoading: newReleasesVm.isLoading,

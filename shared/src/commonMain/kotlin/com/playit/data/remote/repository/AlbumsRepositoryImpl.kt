@@ -26,7 +26,7 @@ class AlbumsRepositoryImpl(
 ) : AlbumsRepository {
     private var _cacheValidityDuration = 30.minutes
 
-    override suspend fun getNewReleases(): Flow<Result<NewReleasesResponse>> = flow {
+    override fun getNewReleases(): Flow<Result<NewReleasesResponse>> = flow {
         val cachedAlbums = albumsDao.getAlbumsWithDetails().first()
         val isCachedValid = cachedAlbums.isNotEmpty() && (Clock.System.now()
             .toEpochMilliseconds() - cachedAlbums.first().album.createdAt) < _cacheValidityDuration.inWholeMilliseconds

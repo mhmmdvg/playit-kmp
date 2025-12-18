@@ -14,7 +14,7 @@ data class ProfileResponse(
     val followers: Followers,
     val href: String? = null,
     val id: String,
-    val images: List<Image>,
+    val images: List<Image>? = null,
     val product: String? = null,
     val type: String,
     val uri: String? = null

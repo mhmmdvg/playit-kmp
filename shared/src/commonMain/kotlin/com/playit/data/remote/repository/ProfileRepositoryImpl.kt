@@ -2,56 +2,74 @@
 
 package com.playit.data.remote.repository
 
-import com.playit.data.cache.ProfileCacheStore
 import com.playit.data.remote.api.ProfileApi
-import com.playit.domain.models.CacheData
+import com.playit.data.remote.local.dao.ProfileDao
+import com.playit.data.remote.local.mappers.toDomain
+import com.playit.data.remote.local.mappers.toProfileEntity
+import com.playit.data.remote.local.mappers.toProfileImageEntities
 import com.playit.domain.models.ProfileResponse
 import com.playit.domain.repository.ProfileRepository
-import io.ktor.client.call.body
-import io.ktor.client.plugins.ClientRequestException
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 class ProfileRepositoryImpl(
     private val profileApi: ProfileApi,
-    private val profileCacheStore: ProfileCacheStore
+    private val profileDao: ProfileDao
+//    private val profileCacheStore: ProfileCacheStore
 ) : ProfileRepository {
-    private val _cacheExpiration = 60.minutes
+    private var _lastFetchTime = 0L
+    private val _cacheExpiration = 60.minutes.inWholeMilliseconds
 
-    suspend fun getCachedData(): CacheData<ProfileResponse>? = profileCacheStore.loadProfile()
+    override fun getCurrentProfile(): Flow<Result<ProfileResponse>> = flow {
+        val dbFlow = profileDao.getProfileDetail()
+            .map { relations ->
+                val domainProfile = relations.toDomain()
 
-    override suspend fun getCurrentProfile(): Result<ProfileResponse> {
-        val cachedData = profileCacheStore.loadProfile()
-        if (cachedData != null && cacheIsValid(cachedData.timestamp)) {
-            return Result.success(cachedData.data)
-        }
+                println("Repo Level $domainProfile")
 
-        return runCatching {
-            val res = profileApi.getCurrentProfile()
-            profileCacheStore.saveProfile(
-                data = res,
-                timestamp = Clock.System.now().epochSeconds
-            )
-            res
-        }.recoverCatching { error ->
-            if (error is ClientRequestException) {
-                val errorBody = error.response.body<String>()
-                val errorResponse = Json.decodeFromString<Any>(errorBody)
-                throw Exception(errorResponse.toString())
-            } else {
-                throw error
+                Result.success(domainProfile)
             }
-        }
+
+        emitAll(dbFlow.onStart {
+            if (shouldFetchFromNetwork()) {
+                refreshProfile()
+            }
+        })
     }
 
     override suspend fun invalidateCache() {
-        profileCacheStore.clearCache()
+        profileDao.deleteProfile()
     }
 
-    override fun cacheIsValid(timestamp: Long): Boolean {
-        return Clock.System.now() - Instant.fromEpochSeconds(timestamp) < _cacheExpiration
+    private suspend fun refreshProfile() {
+        runCatching {
+            val response = profileApi.getCurrentProfile()
+            println("Response $response")
+            cacheProfile(response)
+            _lastFetchTime = Clock.System.now().toEpochMilliseconds()
+        }.onFailure { error ->
+            println("Profile refresh failed: $error")
+        }
     }
+
+    private suspend fun cacheProfile(profile: ProfileResponse) {
+        val profileEntities = profile.toProfileEntity()
+        val imageEntities = profile.toProfileImageEntities()
+
+        profileDao.insertProfile(profileEntities)
+        if (imageEntities.isNotEmpty()) {
+            profileDao.insertProfileImages(imageEntities)
+        }
+    }
+
+    private fun shouldFetchFromNetwork(): Boolean {
+        return (Clock.System.now().toEpochMilliseconds() - _lastFetchTime) > _cacheExpiration
+    }
+
 }

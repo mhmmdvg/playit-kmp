@@ -22,7 +22,7 @@ data class PlaylistItems(
     val externalUrls: ExternalUrls,
     val href: String,
     val id: String,
-    val images: List<Image>,
+    val images: List<Image>? = null,
     val name: String,
     val owner: Owner,
     val public: Boolean,
@@ -61,4 +61,11 @@ data class Owner(
 data class Tracks(
     val href: String,
     val total: Int
+)
+
+@Serializable
+data class CreatePlaylistRequest(
+    val name: String,
+    val description: String? = "",
+    val public: Boolean = false
 )

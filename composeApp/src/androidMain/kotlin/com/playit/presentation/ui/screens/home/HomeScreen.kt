@@ -105,7 +105,7 @@ fun HomeScreen(
                                 modifier = Modifier.width(cardWidth),
                                 onClick = { Log.d("HomeScreen", "New Album") },
                                 name = playlist.name,
-                                images = playlist.images[0].url,
+                                images = playlist.images?.firstOrNull()?.url ?: "https://github.com/evilrabbit.png",
                             )
                         })
                     }
@@ -170,34 +170,6 @@ fun HomeScreen(
                     }
                 }
             )
-
-//            when(newRelease) {
-//                is Resource.Loading -> {
-//                    Row(
-//                        horizontalArrangement = Arrangement.spacedBy(22.dp, alignment = Alignment.CenterHorizontally),
-//                    ) {
-//                        (1..3).forEach {
-//                            SkeletonNewAlbumCard(
-//                                modifier = Modifier.width(cardWidth),
-//                            )
-//                        }
-//                    }
-//                }
-//                is Resource.Success -> {
-//                    Row(
-//                        horizontalArrangement = Arrangement.spacedBy(22.dp, alignment = Alignment.CenterHorizontally),
-//                    ) {
-//                        (newRelease.data?.albums?.items?.take(3)?.forEach { album ->
-//                            NewAlbumCard(
-//                                modifier = Modifier.width(cardWidth),
-//                                albumData = album,
-//                                onClick = { Log.d("HomeScreen", "New Album") }
-//                            )
-//                        })
-//                    }
-//                }
-//                is Resource.Error -> {}
-//            }
 
             Spacer(modifier = Modifier.height(22.dp))
 
