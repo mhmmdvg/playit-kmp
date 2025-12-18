@@ -28,6 +28,7 @@ import com.playit.presentation.ui.screens.library.components.PlaylistCard
 import com.playit.presentation.ui.screens.library.components.SkeletonPlaylistCard
 import com.playit.viewmodels.CurrentPlaylistsViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 @Composable
@@ -36,7 +37,7 @@ fun LibraryScreen(
     onScrollOffsetChanged: (Int) -> Unit = {},
     navigationTitle: @Composable () -> Unit = {},
     onAddPlaylist: () -> Unit = {},
-    currentPaylistVm: CurrentPlaylistsViewModel = koinInject()
+    currentPaylistVm: CurrentPlaylistsViewModel = koinViewModel()
 ) {
     val currentPaylist by remember { currentPaylistVm.currentPlaylists }.collectAsState()
     val lazyListState = rememberLazyListState()
@@ -53,7 +54,6 @@ fun LibraryScreen(
     }
 
     LaunchedEffect(totalScrollOffset.value) { onScrollOffsetChanged(totalScrollOffset.value) }
-
 
     Box(
         modifier = Modifier

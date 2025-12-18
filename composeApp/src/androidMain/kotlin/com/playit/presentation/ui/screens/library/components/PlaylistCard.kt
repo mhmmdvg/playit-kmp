@@ -69,7 +69,7 @@ fun PlaylistCard(
                 modifier = Modifier
                     .size(72.dp)
                     .clip(RoundedCornerShape(12.dp)),
-                imageUrl = data.images[0].url
+                imageUrl = data.images?.firstOrNull()?.url ?: "https://github.com/evilrabbit.png",
             )
 
             Column(

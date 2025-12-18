@@ -7,7 +7,7 @@ import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 interface AlbumsRepository {
-    suspend fun getNewReleases(): Flow<Result<NewReleasesResponse>>
+    fun getNewReleases(): Flow<Result<NewReleasesResponse>>
     suspend fun invalidateCache()
 //    fun cacheIsValid(timestamp: Long): Boolean
 }

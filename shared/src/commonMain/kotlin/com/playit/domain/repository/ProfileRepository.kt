@@ -1,9 +1,9 @@
 package com.playit.domain.repository
 
 import com.playit.domain.models.ProfileResponse
+import kotlinx.coroutines.flow.Flow
 
 interface ProfileRepository {
-    suspend fun getCurrentProfile(): Result<ProfileResponse>
+    fun getCurrentProfile(): Flow<Result<ProfileResponse>>
     suspend fun invalidateCache()
-    fun cacheIsValid(timestamp: Long): Boolean
 }

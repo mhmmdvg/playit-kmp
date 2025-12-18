@@ -10,4 +10,5 @@ fun databaseModule(): Module = module {
     single<AppDatabase> { getDatabaseBuilder(get<DatabaseDriveFactory>()) }
     single { get<AppDatabase>().albumsDao() }
     single { get<AppDatabase>().playlistsDao() }
+    single { get<AppDatabase>().profileDao() }
 }

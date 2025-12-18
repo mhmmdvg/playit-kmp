@@ -37,7 +37,7 @@ fun GridAlbumCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 //    albumData: Item? = null,
-    images: String? = null,
+    images: String,
     name: String? = null,
     artist: String? = null,
 ) {
@@ -69,7 +69,7 @@ fun GridAlbumCard(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             CacheImage(
-                imageUrl = images ?: "",
+                imageUrl = images,
                 modifier = Modifier.fillMaxSize()
                     .shadow(
                         elevation = 6.dp,
@@ -79,7 +79,7 @@ fun GridAlbumCard(
                     )
                     .clip(RoundedCornerShape(16.dp)),
                 description = name ?: "",
-                contentScale = ContentScale.FillBounds
+                contentScale = ContentScale.Fit
             )
 
             Column(

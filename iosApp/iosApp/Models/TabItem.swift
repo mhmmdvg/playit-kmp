@@ -25,7 +25,7 @@ enum TabItem: String, CaseIterable {
     var view: some View {
         switch self {
         case .home:
-            HomeView(albumsRepository: KoinHelper.companion.shared.provideAlbumsRepository())
+            HomeView(albumsRepository: KoinHelper.companion.shared.provideAlbumsRepository(), currentPlaylistsRepository: KoinHelper.companion.shared.providePlaylistsRepository())
         case .search:
             SearchView()
         case .library:

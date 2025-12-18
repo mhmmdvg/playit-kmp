@@ -4,12 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.playit.data.remote.repository.PlaylistsRepositoryImpl
 import com.playit.data.remote.resources.Resource
+import com.playit.domain.models.CreatePlaylistRequest
 import com.playit.domain.models.CurrentPlaylistsResponse
 import com.playit.utils.CommonFlow
 import com.playit.utils.asCommonFlow
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlin.fold
 
 class CurrentPlaylistsViewModel(
     private val playlistsRepositoryImpl: PlaylistsRepositoryImpl
@@ -17,6 +19,10 @@ class CurrentPlaylistsViewModel(
     private val _currentPlaylists = MutableStateFlow<Resource<CurrentPlaylistsResponse>>(Resource.Success(null))
     val currentPlaylists: StateFlow<Resource<CurrentPlaylistsResponse>> = _currentPlaylists.asStateFlow()
     val currentPlaylistsFlow: CommonFlow<Resource<CurrentPlaylistsResponse>> = _currentPlaylists.asCommonFlow()
+
+    private val _createPlaylistState = MutableStateFlow<Resource<Unit>>(Resource.Success(null))
+    val createPlaylistState: StateFlow<Resource<Unit>> = _createPlaylistState.asStateFlow()
+    val createPlaylistStateFlow: CommonFlow<Resource<Unit>> = _createPlaylistState.asCommonFlow()
 
     var fetchJob: Job? = null
 
@@ -59,6 +65,24 @@ class CurrentPlaylistsViewModel(
                     )
                 }
         }
+    }
+
+    fun createPlaylist(userId: String, request: CreatePlaylistRequest) {
+       viewModelScope.launch {
+           val result = playlistsRepositoryImpl.createPlaylist(userId, request)
+
+           result.fold(
+               onSuccess = {
+                   _createPlaylistState.value = Resource.Success(Unit)
+               },
+               onFailure = { exception ->
+                     _createPlaylistState.value =
+                          Resource.Error(
+                            message = exception.message ?: "Something went wrong"
+                          )
+               }
+           )
+       }
     }
 
     fun retry() {

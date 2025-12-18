@@ -38,10 +38,11 @@ fun NavigationTitle(
     title: String,
     scrollOffset: Int = 0,
     maxOffset: Int = 200,
-    currentMeVm: CurrentMeViewModel = koinInject(),
+    trailingAction: @Composable (() -> Unit)? = null,
+//    currentMeVm: CurrentMeViewModel = koinInject(),
 ) {
-    val currentMe by remember { currentMeVm.currentMe }.collectAsState()
-    val interactionSource = remember { MutableInteractionSource() }
+//    val currentMe by remember { currentMeVm.currentMe }.collectAsState()
+//    val interactionSource = remember { MutableInteractionSource() }
 
     val collapseProgress = min(1f, max(0f, scrollOffset.toFloat() / maxOffset))
 
@@ -81,41 +82,45 @@ fun NavigationTitle(
                     letterSpacing = (-0.5).sp
                 )
 
-                when (currentMe) {
-                    is Resource.Loading -> {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .shimmerEffect()
-                        )
-                    }
-
-                    is Resource.Success -> {
-                        CacheImage(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .clickable(
-                                    interactionSource = interactionSource,
-                                    indication = null,
-                                    onClick = {
-                                        navController.navigate("profile")
-                                    }
-                                ),
-                            imageUrl = currentMe.data?.images?.get(0)?.url ?: ""
-                        )
-                    }
-
-                    is Resource.Error -> {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(Color.Gray.copy(alpha = 0.5f))
-                        )
-                    }
+                trailingAction?.let {
+                    it()
                 }
+
+//                when (currentMe) {
+//                    is Resource.Loading -> {
+//                        Box(
+//                            modifier = Modifier
+//                                .size(48.dp)
+//                                .clip(CircleShape)
+//                                .shimmerEffect()
+//                        )
+//                    }
+//
+//                    is Resource.Success -> {
+//                        CacheImage(
+//                            modifier = Modifier
+//                                .size(48.dp)
+//                                .clip(CircleShape)
+//                                .clickable(
+//                                    interactionSource = interactionSource,
+//                                    indication = null,
+//                                    onClick = {
+//                                        navController.navigate("profile")
+//                                    }
+//                                ),
+//                            imageUrl = currentMe.data?.images?.get(0)?.url ?: ""
+//                        )
+//                    }
+//
+//                    is Resource.Error -> {
+//                        Box(
+//                            modifier = Modifier
+//                                .size(48.dp)
+//                                .clip(CircleShape)
+//                                .background(Color.Gray.copy(alpha = 0.5f))
+//                        )
+//                    }
+//                }
             }
         }
     }

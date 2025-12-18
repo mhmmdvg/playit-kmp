@@ -1,22 +1,48 @@
 package com.playit.presentation
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.navigation.compose.*
+import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.navigation
+import androidx.navigation.compose.rememberNavController
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Plus
 import com.playit.data.remote.repository.AuthenticationRepositoryImpl
 import com.playit.presentation.ui.components.AppBar
+import com.playit.presentation.ui.components.Avatar
 import com.playit.presentation.ui.components.BottomNavigation
+import com.playit.presentation.ui.components.CreatePlaylistBottomSheet
 import com.playit.presentation.ui.components.NavigationTitle
 import com.playit.presentation.ui.screens.authentication.AuthenticationScreen
 import com.playit.presentation.ui.screens.home.HomeScreen
@@ -25,8 +51,10 @@ import com.playit.presentation.ui.screens.profile.ProfileScreen
 import com.playit.presentation.ui.screens.search.SearchScreen
 import com.playit.presentation.ui.theme.DarkColorScheme
 import com.playit.presentation.ui.theme.LightColorScheme
+import com.playit.viewmodels.CurrentMeViewModel
 import com.playit.viewmodels.CurrentPlaylistsViewModel
 import com.playit.viewmodels.NewReleasesViewModel
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
@@ -39,7 +67,7 @@ import kotlin.math.min
 fun App(
     darkTheme: Boolean = isSystemInDarkTheme(),
     onLaunchOAuth: (String) -> Unit,
-    onSetTabCloseListener: (() -> Unit) -> Unit
+    onSetTabCloseListener: (() -> Unit) -> Unit,
 ) {
 
     val navController = rememberNavController()
@@ -53,7 +81,6 @@ fun App(
     val maxOffset = 200
     val collapseProgress = min(1f, max(0f, scrollOffset.toFloat() / maxOffset))
 
-
     LaunchedEffect(isAuthenticated) {
         if (isAuthenticated && currentRoute == Screen.AuthenticationScreen.route) {
             navController.navigate(Screen.BottomNav.route) {
@@ -65,6 +92,7 @@ fun App(
             }
         }
     }
+
 
     val startDestination =
         if (authenticationRepositoryImpl.isUserLoggedIn()) Screen.BottomNav.route else Screen.AuthenticationScreen.route
@@ -232,6 +260,14 @@ fun App(
                                     navController = navController,
                                     scrollOffset = scrollOffset,
                                     maxOffset = maxOffset,
+                                    trailingAction = {
+                                        Avatar(
+                                            modifier = Modifier.size(48.dp),
+                                            onClick = {
+                                                navController.navigate("profile")
+                                            }
+                                        )
+                                    }
                                 )
                             },
                             newReleaseVm = newReleaseViewModel,
@@ -250,6 +286,34 @@ fun App(
 
                         val currentPlaylistsViewModel: CurrentPlaylistsViewModel =
                             koinViewModel<CurrentPlaylistsViewModel>(viewModelStoreOwner = parentEntry)
+                        val currentMeViewModel: CurrentMeViewModel =
+                            koinViewModel<CurrentMeViewModel>(viewModelStoreOwner = parentEntry)
+
+                        val currentMe by currentMeViewModel.currentMe.collectAsState()
+
+                        val sheetState = rememberModalBottomSheetState()
+                        var showBottomSheet by remember { mutableStateOf(false) }
+                        val scope = rememberCoroutineScope()
+
+                        if (showBottomSheet) {
+                            CreatePlaylistBottomSheet(
+                                sheetState = sheetState,
+                                onDismiss = {
+                                    showBottomSheet = false
+                                },
+                                onCreatePlaylist = { request ->
+                                    currentPlaylistsViewModel.createPlaylist(
+                                        userId = currentMe.data?.id ?: "",
+                                        request = request
+                                    )
+                                    scope.launch {
+                                        sheetState.hide()
+                                        showBottomSheet = false
+                                    }
+                                },
+                                isLoading = false
+                            )
+                        }
 
                         LibraryScreen(
                             onScrollOffsetChanged = { offset ->
@@ -261,6 +325,19 @@ fun App(
                                     navController = navController,
                                     scrollOffset = scrollOffset,
                                     maxOffset = maxOffset,
+                                    trailingAction = {
+                                        IconButton(
+                                            onClick = {
+                                                showBottomSheet = true
+                                            }
+                                        ) {
+                                            Icon(
+                                                imageVector = Lucide.Plus,
+                                                contentDescription = "Add Playlist",
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
                                 )
                             },
                             currentPaylistVm = currentPlaylistsViewModel,
