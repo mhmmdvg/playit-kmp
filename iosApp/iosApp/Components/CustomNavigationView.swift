@@ -29,7 +29,7 @@ struct CustomNavigationView: View {
                 Button {
                     showProfile = true
                 } label: {
-                    AsyncImage(url: URL(string: currentMeVm.currentMeData?.images[0].url ?? "https://i.scdn.co/image/ab67616d00001e02bc1028b7e9cd2b17c770a520")) { image in
+                    AsyncImage(url: URL(string: currentMeVm.currentMeData?.images?[0].url ?? "https://i.scdn.co/image/ab67616d00001e02bc1028b7e9cd2b17c770a520")) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fill)

@@ -28,7 +28,7 @@ class CurrentMeViewModel(
         loadCurrentMe()
     }
 
-    private fun loadCurrentMe() {
+    fun loadCurrentMe() {
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
             profileRepositoryImpl.getCurrentProfile()

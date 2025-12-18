@@ -22,6 +22,15 @@ struct CurrentPlaylists: View {
         print("playlist \(playlistId)")
     }
     
+    private func getImageUrl(from playlist: PlaylistItems) -> String {
+        guard let images = playlist.images,
+              !images.isEmpty,
+              let firstImage = images.first else {
+            return "https://github.com/evilrabbit.png"
+        }
+        return firstImage.url
+    }
+    
     var body: some View {
         HStack {
             Text("Jump back in")
@@ -40,10 +49,10 @@ struct CurrentPlaylists: View {
                     .foregroundStyle(.red)
                     .padding()
             } else if let currPlaylistData = currentPlaylistsData {
-                ForEach(currPlaylistData, id: \.id) { it in
+                ForEach(currPlaylistData.prefix(3), id: \.id) { it in
                     Button(action: {}) {
                         VStack(alignment: .leading, spacing: 8) {
-                            PlaylistImage(url: it.images[0].url)
+                            PlaylistImage(url: getImageUrl(from: it))
 
                             VStack(alignment: .leading) {
                                 Text(it.name)
@@ -53,7 +62,6 @@ struct CurrentPlaylists: View {
                                     .lineLimit(2)
                                     .truncationMode(.tail)
                             }
-//                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
                     .scaleEffect(pressedPlaylists == it.id ? 0.95 : 1.0)
@@ -65,52 +73,7 @@ struct CurrentPlaylists: View {
                             Label("Play", systemImage: "play.fill")
                         }
                     }, preview: {
-                        VStack(spacing: 16) {
-                            CacheImage(url: URL(string: it.images[0].url)!) { phase in
-                                if let image = phase.image {
-                                    image
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 200)
-                                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                                        .shadow(color: .purple.opacity(0.3), radius: 12, x: 0, y: 6)
-                                } else if phase.error != nil {
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .fill(Color.gray.opacity(0.3))
-                                        .frame(width: 200, height: 200)
-                                        .overlay {
-                                            Image(systemName: "photo")
-                                                .foregroundStyle(.gray)
-                                                .font(.largeTitle)
-                                        }
-                                } else {
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .fill(Color.gray.opacity(0.3))
-                                        .frame(width: 200, height: 200)
-                                        .overlay {
-                                            ProgressView()
-                                                .scaleEffect(1.0)
-                                        }
-                                }
-                            }
-                            
-                            VStack(spacing: 8) {
-                                Text(it.name)
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                                    .multilineTextAlignment(.center)
-                                    .foregroundColor(.primary)
-                                    .lineLimit(3)
-                            }
-                            .padding(.horizontal, 16)
-                        }
-                        .padding(20)
-                        .frame(width: 280)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(.regularMaterial)
-                        )
+                        playlistPreview(for: it)
                     })
                     .onLongPressGesture(minimumDuration: 0, maximumDistance: .infinity, pressing: { isPressing in
                         withAnimation(.easeInOut(duration: 0.1)) {
@@ -119,10 +82,81 @@ struct CurrentPlaylists: View {
                     }, perform: {
                         handlePlaylistTap(it.id)
                     })
-//                    .frame(maxWidth: .infinity, alignment: .top)
                 }
             }
         }
+    }
+    
+    @ViewBuilder
+    private func playlistPreview(for playlist: PlaylistItems) -> some View {
+        let imageURLString = getImageUrl(from: playlist)
+        let imageURL = URL(string: imageURLString)
+        
+        VStack(spacing: 16) {
+            playlistPreviewImage(url: imageURL)
+            playlistPreviewTitle(playlist.name)
+        }
+        .padding(20)
+        .frame(width: 280)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.regularMaterial)
+        )
+    }
+    
+    @ViewBuilder
+    private func playlistPreviewImage(url: URL?) -> some View {
+        CacheImage(url: url!) { phase in
+            if let image = phase.image {
+                image
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 200)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .shadow(color: .purple.opacity(0.3), radius: 12, x: 0, y: 6)
+            } else if phase.error != nil {
+                placeholderImage()
+            } else {
+                loadingImage()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func placeholderImage() -> some View {
+        RoundedRectangle(cornerRadius: 16)
+            .fill(Color.gray.opacity(0.3))
+            .frame(width: 200, height: 200)
+            .overlay {
+                Image(systemName: "photo")
+                    .foregroundStyle(.gray)
+                    .font(.largeTitle)
+            }
+    }
+    
+    @ViewBuilder
+    private func loadingImage() -> some View {
+        RoundedRectangle(cornerRadius: 16)
+            .fill(Color.gray.opacity(0.3))
+            .frame(width: 200, height: 200)
+            .overlay {
+                ProgressView()
+                    .scaleEffect(1.0)
+            }
+    }
+    
+    @ViewBuilder
+    private func playlistPreviewTitle(_ title: String) -> some View {
+        VStack(spacing: 8) {
+            Text(title)
+                .font(.title2)
+                .fontWeight(.bold)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.primary)
+                .lineLimit(3)
+        }
+        .padding(.horizontal, 16)
     }
 }
 
@@ -131,32 +165,45 @@ struct PlaylistImage: View {
     var size: CGFloat = 90
     
     var body: some View {
-        CacheImage(url: URL(string: url)!) { phase in
-            if let img = phase.image {
-                    
-                img
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: size, height: size)
-                    .clipped()
-                    .cornerRadius(16)
-            } else if phase.error != nil {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(.gray.opacity(0.3))
-                    .frame(width: size, height: size)
-                    .overlay {
-                        Image(systemName: "photo")
-                            .foregroundStyle(.gray)
-                    }
-            } else {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(.gray.opacity(0.3))
-                    .frame(width: size, height: size)
-                    .overlay {
-                        ProgressView()
-                            .scaleEffect(0.7)
-                    }
+        if let validURL = URL(string: url) {
+            CacheImage(url: validURL) { phase in
+                if let img = phase.image {
+                    img
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: size, height: size)
+                        .clipped()
+                        .cornerRadius(16)
+                } else if phase.error != nil {
+                    placeholderView()
+                } else {
+                    loadingView()
+                }
             }
+        } else {
+            placeholderView()
         }
+    }
+    
+    @ViewBuilder
+    private func placeholderView() -> some View {
+        RoundedRectangle(cornerRadius: 16)
+            .fill(.gray.opacity(0.3))
+            .frame(width: size, height: size)
+            .overlay {
+                Image(systemName: "photo")
+                    .foregroundStyle(.gray)
+            }
+    }
+    
+    @ViewBuilder
+    private func loadingView() -> some View {
+        RoundedRectangle(cornerRadius: 16)
+            .fill(.gray.opacity(0.3))
+            .frame(width: size, height: size)
+            .overlay {
+                ProgressView()
+                    .scaleEffect(0.7)
+            }
     }
 }

@@ -22,6 +22,7 @@ struct NewAlbums: View {
         print("album \(albumId)")
     }
     
+    
     var body: some View {
         HStack {
             Text("New Albums")
