@@ -1,9 +1,6 @@
 package com.playit.di
 
 import com.playit.data.cache.DataStoreFactory
-import com.playit.data.cache.NewReleasesCacheStore
-import com.playit.data.cache.PlaylistCacheStore
-import com.playit.data.cache.ProfileCacheStore
 import com.playit.data.remote.api.AlbumsApi
 import com.playit.data.remote.api.PlaylistsApi
 import com.playit.data.remote.api.ProfileApi
@@ -29,9 +26,6 @@ val appModule = module {
 
     // Cache
     single { DataStoreFactory.createDataStore() }
-    singleOf(::NewReleasesCacheStore)
-    singleOf(::PlaylistCacheStore)
-    singleOf(::ProfileCacheStore)
 
 //    Repository
     singleOf(::AuthenticationRepositoryImpl).bind<AuthenticationRepository>()
