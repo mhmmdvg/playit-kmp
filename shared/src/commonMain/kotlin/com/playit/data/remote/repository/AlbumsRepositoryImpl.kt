@@ -2,6 +2,7 @@ package com.playit.data.remote.repository
 
 import com.playit.data.remote.api.AlbumsApi
 import com.playit.data.remote.local.dao.AlbumsDao
+import com.playit.data.remote.local.entities.ResourceMetadataEntity
 import com.playit.data.remote.local.mappers.toAlbumArtistCrossRefs
 import com.playit.data.remote.local.mappers.toAlbumEntity
 import com.playit.data.remote.local.mappers.toAlbumImageEntities
@@ -24,12 +25,12 @@ class AlbumsRepositoryImpl(
     private val albumsApi: AlbumsApi,
     private val albumsDao: AlbumsDao
 ) : AlbumsRepository {
-    private var _cacheValidityDuration = 30.minutes
+    private val _resourceKey = "new_releases"
+    private val _cacheValidityDuration = 30.minutes.inWholeMilliseconds
 
     override fun getNewReleases(): Flow<Result<NewReleasesResponse>> = flow {
         val cachedAlbums = albumsDao.getAlbumsWithDetails().first()
-        val isCachedValid = cachedAlbums.isNotEmpty() && (Clock.System.now()
-            .toEpochMilliseconds() - cachedAlbums.first().album.createdAt) < _cacheValidityDuration.inWholeMilliseconds
+        val isCachedValid = cachedAlbums.isNotEmpty() && shouldFetchFromNetwork()
 
         if (isCachedValid) {
             println("Using cached new releases data")
@@ -99,10 +100,22 @@ class AlbumsRepositoryImpl(
                 albumsDao.insertAlbumMarkets(markets)
             }
         }
+
+        albumsDao.saveLastFetchTime(
+            ResourceMetadataEntity(
+                _resourceKey,
+                Clock.System.now().toEpochMilliseconds()
+            )
+        )
     }
 
     override suspend fun invalidateCache() {
         albumsDao.clearAllAlbums()
         albumsDao.deleteOrphanedArtists()
+    }
+
+    private suspend fun shouldFetchFromNetwork(): Boolean {
+        val lastFetch = albumsDao.getLastFetchTime(_resourceKey) ?: 0L
+        return (Clock.System.now().toEpochMilliseconds() - lastFetch) > _cacheValidityDuration
     }
 }

@@ -6,6 +6,7 @@ import com.playit.data.remote.local.entities.AlbumEntity
 import com.playit.data.remote.local.entities.AlbumImageEntity
 import com.playit.data.remote.local.entities.AlbumMarketEntity
 import com.playit.data.remote.local.entities.ArtistEntity
+import com.playit.data.remote.local.entities.ResourceMetadataEntity
 import com.playit.data.remote.local.relations.AlbumWithDetails
 import kotlinx.coroutines.flow.Flow
 
@@ -42,6 +43,9 @@ interface AlbumsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAlbumMarkets(markets: List<AlbumMarketEntity>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun saveLastFetchTime(metadata: ResourceMetadataEntity)
+
     /* Query Operations with Relations */
     @Transaction
     @Query("SELECT * FROM albums")
@@ -56,6 +60,9 @@ interface AlbumsDao {
 
     @Query("SELECT * FROM albums WHERE id = :albumId")
     fun getAlbumById(albumId: String): Flow<AlbumEntity?>
+
+    @Query("SELECT lastFetchedAt FROM resource_metadata WHERE resourceId = :resourceId")
+    suspend fun getLastFetchTime(resourceId: String): Long?
 
     /* Delete Operations */
     @Query("DELETE FROM albums")

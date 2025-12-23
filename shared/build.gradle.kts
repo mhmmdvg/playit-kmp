@@ -30,7 +30,7 @@ kotlin {
     
     sourceSets {
         commonMain.dependencies {
-            implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:2.8.4")
+            implementation(libs.lifecycle.viewmodel)
 
             // Room
             implementation(libs.androidx.room.runtime)
@@ -42,7 +42,7 @@ kotlin {
 
             // Koin Core
             implementation(libs.koin.core)
-            implementation("io.insert-koin:koin-core-viewmodel:4.1.0")
+            implementation(libs.koin.core.viewmodel)
 
             // Ktor Client Core
             implementation(libs.ktor.client.core)

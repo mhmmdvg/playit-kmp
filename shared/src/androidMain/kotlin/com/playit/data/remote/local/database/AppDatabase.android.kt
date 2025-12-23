@@ -8,7 +8,7 @@ import androidx.room.RoomDatabaseConstructor
 actual class DatabaseDriveFactory(private val context: Context) {
     actual fun createDriver(): RoomDatabase.Builder<AppDatabase> {
         val appContext = context.applicationContext
-        val dbFile = appContext.getDatabasePath("playit_database.db")
+        val dbFile = appContext.getDatabasePath(AppDatabase.DATABASE_NAME)
 
         return Room.databaseBuilder<AppDatabase>(
             context = appContext,

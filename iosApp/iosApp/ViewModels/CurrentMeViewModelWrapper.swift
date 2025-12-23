@@ -30,7 +30,7 @@ class CurrentMeViewModelWrapper: ObservableObject {
     }
     
     func getCurrentMe() {
-        viewModel.getCurrentMe()
+        viewModel.loadCurrentMe()
     }
     
     private func startObserving() {
