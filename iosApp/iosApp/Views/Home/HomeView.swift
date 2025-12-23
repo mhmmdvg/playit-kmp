@@ -49,9 +49,6 @@ struct HomeView: View {
                     lastScrollOffset = newValue
                 }
             }
-            .onAppear {
-                newReleasesVm.getNewReleases()
-            }
             
             GradientAppBar()
             

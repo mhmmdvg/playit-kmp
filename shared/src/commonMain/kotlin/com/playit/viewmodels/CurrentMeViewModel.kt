@@ -34,28 +34,29 @@ class CurrentMeViewModel(
             profileRepositoryImpl.getCurrentProfile()
                 .onStart {
                     if (_currentMe.value.data == null) {
-                        _currentMe.value = Resource.Loading()
+                        _currentMe.emit(Resource.Loading())
                     }
                 }
                 .catch { exception ->
-                    _currentMe.value =
+                    _currentMe.emit(
                         Resource.Error(
                             message = exception.message ?: "Something went wrong",
                             data = _currentMe.value.data
                         )
+                    )
                 }
                 .collect { result ->
                     result.fold(
                         onSuccess = { response ->
-                            println("Check $response")
-                            _currentMe.value = Resource.Success(response)
+                            _currentMe.emit(Resource.Success(response))
                         },
                         onFailure = { exception ->
-                            _currentMe.value =
+                            _currentMe.emit(
                                 Resource.Error(
                                     message = exception.message ?: "Something went wrong",
                                     data = _currentMe.value.data
                                 )
+                            )
                         }
                     )
                 }
@@ -66,41 +67,4 @@ class CurrentMeViewModel(
         super.onCleared()
         fetchJob?.cancel()
     }
-
-//    init {
-//        if (_currentMe.value is Resource.Loading) {
-//            getCurrentMe()
-//        }
-//    }
-//
-//    private fun initializeWithCache(): Resource<ProfileResponse> {
-//        return try {
-//            val cachedData = runBlocking(Dispatchers.IO) { profileRepositoryImpl.getCachedData() }
-//            if (cachedData != null && profileRepositoryImpl.cacheIsValid(cachedData.timestamp)) {
-//                Resource.Success(cachedData.data)
-//            } else {
-//                Resource.Loading()
-//            }
-//        } catch (error: Exception) {
-//            println("Cache loading failed during initialization: ${error.message}")
-//            Resource.Loading()
-//        }
-//    }
-//
-//    fun getCurrentMe() {
-//        viewModelScope.launch {
-//            if (_currentMe.value !is Resource.Success) {
-//                _currentMe.value = Resource.Loading()
-//            }
-//
-//            try {
-//                profileRepositoryImpl.getCurrentProfile().fold(
-//                    onSuccess = { _currentMe.value = Resource.Success(it) },
-//                    onFailure = { _currentMe.value = Resource.Error(it.message ?: "Something went wrong") }
-//                )
-//            } catch (error: Exception) {
-//                _currentMe.value = Resource.Error(error.message ?: "Something went wrong")
-//            }
-//        }
-//    }
 }

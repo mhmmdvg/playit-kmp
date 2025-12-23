@@ -29,7 +29,7 @@ enum TabItem: String, CaseIterable {
         case .search:
             SearchView()
         case .library:
-            LibraryView(currentPlaylistRepository: KoinHelper.companion.shared.providePlaylistsRepository())
+            LibraryView(currentPlaylistRepository: KoinHelper.companion.shared.providePlaylistsRepository(), currentMeRepository: KoinHelper.companion.shared.provideProfileRepository())
         }
     }
 }

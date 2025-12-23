@@ -44,7 +44,9 @@ struct ProfileView: View {
                                 .foregroundColor(.secondary)
                             
                             Button(action: {
-                                currentPlaylistVm.getCurrentPlaylists()
+                                Task {
+                                    await currentPlaylistVm.getCurrentPlaylists()
+                                }
                             }) {
                                 Text("Retry")
                                     .fontWeight(.semibold)

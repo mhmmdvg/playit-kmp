@@ -38,6 +38,10 @@ class CurrentPlaylistsViewModelWrapper: ObservableObject {
         viewModel.loadCurrentPlaylists(forceRefresh: false)
     }
     
+    func createPlaylist(userId: String, req: CreatePlaylistRequest) {
+        viewModel.createPlaylist(userId: userId, request: req)
+    }
+    
     private func startObserving() {
         closeable = viewModel.currentPlaylistsFlow.watch(block: { [weak self] state in
             DispatchQueue.main.async {
